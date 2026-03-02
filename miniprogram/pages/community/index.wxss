@@ -1,0 +1,239 @@
+/* pages/community/index.wxss */
+.container {
+  min-height: 100vh;
+  background-color: #FFF8F0;
+  padding-bottom: 120rpx;
+}
+
+/* Tab栏 */
+.tab-bar {
+  display: flex;
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30rpx 0;
+  position: relative;
+}
+
+.tab-text {
+  font-size: 32rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.tab-item.active .tab-text {
+  color: #E8713A;
+  font-weight: 600;
+}
+
+.tab-line {
+  width: 60rpx;
+  height: 6rpx;
+  background-color: #E8713A;
+  border-radius: 3rpx;
+  margin-top: 10rpx;
+}
+
+/* 内容区 */
+.content {
+  padding: 20rpx;
+}
+
+/* ========== 动态列表样式 ========== */
+.post-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF9A56 0%, #E8713A 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-right: 20rpx;
+}
+
+.post-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.author-name {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 6rpx;
+}
+
+.post-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.post-content {
+  font-size: 32rpx;
+  color: #333;
+  line-height: 1.8;
+  margin-bottom: 20rpx;
+  word-break: break-all;
+}
+
+.post-footer {
+  display: flex;
+  align-items: center;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.like-btn {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 24rpx;
+  border-radius: 40rpx;
+  background-color: #f8f8f8;
+}
+
+.like-btn.liked {
+  background-color: #ffe8e0;
+}
+
+.like-btn .icon {
+  font-size: 32rpx;
+  margin-right: 8rpx;
+}
+
+.like-count {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.like-btn.liked .like-count {
+  color: #E8713A;
+}
+
+/* ========== 问答列表样式 ========== */
+.question-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.question-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.question-title {
+  flex: 1;
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.6;
+  margin-right: 20rpx;
+}
+
+.answer-badge {
+  background-color: #FFF3E6;
+  color: #E8713A;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  white-space: nowrap;
+}
+
+.question-content {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.question-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.question-footer .author-name {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.question-time {
+  font-size: 24rpx;
+  color: #ccc;
+}
+
+/* ========== 公共样式 ========== */
+.empty-tip {
+  text-align: center;
+  padding: 100rpx 40rpx;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.loading-tip {
+  text-align: center;
+  padding: 40rpx;
+  color: #999;
+  font-size: 26rpx;
+}
+
+/* 悬浮按钮 */
+.float-btn {
+  position: fixed;
+  right: 30rpx;
+  bottom: 150rpx;
+  width: 110rpx;
+  height: 110rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF9A56 0%, #E8713A 100%);
+  box-shadow: 0 8rpx 20rpx rgba(232, 113, 58, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+
+.float-icon {
+  font-size: 60rpx;
+  color: #fff;
+  font-weight: 300;
+  line-height: 1;
+}

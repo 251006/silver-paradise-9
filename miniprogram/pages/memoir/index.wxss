@@ -1,0 +1,98 @@
+/* pages/memoir/index.wxss */
+.memoir-page {
+  padding: 32rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.memoir-header {
+  margin-bottom: 32rpx;
+}
+
+.memoir-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 8rpx;
+}
+
+.memoir-subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: #999999;
+}
+
+.create-btn {
+  margin-bottom: 40rpx;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  display: block;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.empty-hint {
+  font-size: 26rpx;
+  color: #CCCCCC;
+  margin-top: 8rpx;
+}
+
+.memoir-card {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 20rpx;
+  padding: 0;
+  overflow: hidden;
+}
+
+.memoir-card-main {
+  flex: 1;
+  padding: 28rpx;
+}
+
+.memoir-card-main:active {
+  background: #FAFAFA;
+}
+
+.memoir-card-title {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 12rpx;
+}
+
+.memoir-card-content {
+  display: block;
+  font-size: 28rpx;
+  color: #999999;
+  line-height: 1.6;
+  margin-bottom: 12rpx;
+}
+
+.memoir-card-time {
+  display: block;
+  font-size: 24rpx;
+  color: #CCCCCC;
+}
+
+.memoir-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24rpx;
+  background: #FFE8E8;
+}
+
+.memoir-delete:active {
+  background: #FFCCCC;
+}
+
+.delete-text {
+  font-size: 24rpx;
+  color: #FF4D4F;
+  writing-mode: vertical-rl;
+}

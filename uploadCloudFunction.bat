@@ -1,0 +1,1 @@
+"D:\wechat_developer\微信web开发者工具\cli.bat" cloud functions deploy --e cloud1-3gg62631189fd1f5 --n quickstartFunctions --r --project "D:\wechat_developer\Silver_Paradise" --report_first --report

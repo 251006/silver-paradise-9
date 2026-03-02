@@ -1,0 +1,54 @@
+/* pages/post/publish.wxss */
+.publish-page {
+  padding: 32rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.publish-header {
+  margin-bottom: 32rpx;
+}
+
+.publish-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.input-area {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.content-textarea {
+  width: 100%;
+  min-height: 300rpx;
+  font-size: 34rpx;
+  color: #333333;
+  line-height: 1.8;
+  box-sizing: border-box;
+}
+
+.char-count {
+  text-align: right;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #F0F0F0;
+  margin-top: 16rpx;
+}
+
+.char-count text {
+  font-size: 24rpx;
+  color: #CCCCCC;
+}
+
+.submit-btn {
+  margin-top: 20rpx;
+}
+
+.submit-btn[disabled] {
+  background: #CCCCCC !important;
+  opacity: 0.6;
+}

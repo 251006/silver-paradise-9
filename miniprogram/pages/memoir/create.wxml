@@ -1,0 +1,150 @@
+<view class="create-page">
+  <!-- ========== 步骤 1：选素材 ========== -->
+  <block wx:if="{{step === 1}}">
+    <view class="step-header">
+      <text class="step-label">第 1 步</text>
+      <text class="step-title">选择素材</text>
+      <text class="step-desc">选择您发布的动态和回答，AI 将为您撰写回忆录</text>
+    </view>
+
+    <view wx:if="{{loadingMaterial}}" class="loading-box">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <block wx:elif="{{posts.length === 0 && answers.length === 0}}">
+      <view class="empty-state">
+        <text class="empty-state-text">暂无可用素材</text>
+        <text class="empty-hint">发布动态或回答问题后，即可用来生成回忆录</text>
+      </view>
+      <button class="btn btn-primary btn-block manual-btn" bindtap="onManualMode">
+        直接手动撰写
+      </button>
+    </block>
+
+    <block wx:else>
+      <!-- 操作栏 -->
+      <view class="select-toolbar">
+        <text class="selected-info">已选 {{selectedCount}} 条素材</text>
+        <text class="select-all-link" bindtap="toggleSelectAll">
+          {{selectedCount === posts.length + answers.length ? '取消全选' : '全选'}}
+        </text>
+      </view>
+
+      <!-- 动态列表 -->
+      <view wx:if="{{posts.length > 0}}" class="material-section">
+        <text class="section-label">📝 我的动态</text>
+        <view
+          wx:for="{{posts}}"
+          wx:key="_id"
+          class="material-item {{selectedPosts[index] ? 'selected' : ''}}"
+          bindtap="togglePost"
+          data-idx="{{index}}"
+        >
+          <view class="check-box {{selectedPosts[index] ? 'checked' : ''}}">
+            <text wx:if="{{selectedPosts[index]}}">✓</text>
+          </view>
+          <view class="material-text">
+            <text class="material-content">
+              {{item.content.length > 60 ? item.content.substring(0, 60) + '...' : item.content}}
+            </text>
+            <text class="material-time">{{item.createdAt}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 回答列表 -->
+      <view wx:if="{{answers.length > 0}}" class="material-section">
+        <text class="section-label">💬 我的回答</text>
+        <view
+          wx:for="{{answers}}"
+          wx:key="_id"
+          class="material-item {{selectedAnswers[index] ? 'selected' : ''}}"
+          bindtap="toggleAnswer"
+          data-idx="{{index}}"
+        >
+          <view class="check-box {{selectedAnswers[index] ? 'checked' : ''}}">
+            <text wx:if="{{selectedAnswers[index]}}">✓</text>
+          </view>
+          <view class="material-text">
+            <text class="material-content">
+              {{item.content.length > 60 ? item.content.substring(0, 60) + '...' : item.content}}
+            </text>
+            <text class="material-time">{{item.createdAt}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 底部按钮 -->
+      <view class="bottom-actions safe-bottom">
+        <button class="btn btn-secondary" bindtap="onManualMode">
+          手动撰写
+        </button>
+        <button
+          class="btn btn-primary"
+          bindtap="onGenerate"
+          disabled="{{selectedCount === 0}}"
+        >
+          AI 生成回忆录
+        </button>
+      </view>
+    </block>
+  </block>
+
+  <!-- ========== 步骤 2：生成中 ========== -->
+  <block wx:elif="{{step === 2}}">
+    <view class="generating-container">
+      <view class="generating-icon">✍️</view>
+      <text class="generating-title">AI 正在为您撰写回忆录</text>
+      <text class="generating-desc">
+        正在根据 {{materialCount}} 条素材生成，请稍候...
+      </text>
+      <view class="generating-dots">
+        <view class="dot dot1"></view>
+        <view class="dot dot2"></view>
+        <view class="dot dot3"></view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ========== 步骤 3：编辑与保存 ========== -->
+  <block wx:elif="{{step === 3}}">
+    <view class="step-header">
+      <text class="step-label">{{manualMode ? '手动撰写' : '编辑回忆录'}}</text>
+      <text class="step-desc">修改标题和内容后保存</text>
+    </view>
+
+    <view class="edit-form">
+      <input
+        class="input-field title-input"
+        placeholder="请输入回忆录标题"
+        value="{{title}}"
+        bindinput="onTitleInput"
+        maxlength="50"
+      />
+
+      <textarea
+        class="textarea-field content-textarea"
+        placeholder="请输入回忆录内容..."
+        value="{{content}}"
+        bindinput="onContentInput"
+        maxlength="5000"
+        auto-height
+        style="min-height: 400rpx;"
+      />
+    </view>
+
+    <view class="bottom-actions safe-bottom">
+      <button class="btn btn-secondary" bindtap="backToSelect">
+        返回选材
+      </button>
+      <button
+        class="btn btn-primary"
+        bindtap="onSave"
+        disabled="{{saving}}"
+        loading="{{saving}}"
+      >
+        保存回忆录
+      </button>
+    </view>
+  </block>
+</view>

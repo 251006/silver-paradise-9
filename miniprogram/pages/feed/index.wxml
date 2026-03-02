@@ -1,0 +1,42 @@
+<view class="feed-page safe-bottom">
+  <view class="feed-header">
+    <text class="feed-title">长辈们的生活分享</text>
+    <text class="feed-subtitle">来看看长辈们的日常吧</text>
+  </view>
+
+  <view wx:if="{{loading && posts.length === 0}}" class="loading-box">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view wx:elif="{{posts.length === 0}}" class="empty-state">
+    <text class="empty-state-text">暂无长辈动态</text>
+  </view>
+
+  <block wx:else>
+    <view wx:for="{{posts}}" wx:key="_id" class="feed-card card">
+      <view class="feed-card-header">
+        <view class="feed-avatar">
+          <text class="feed-avatar-text">{{item.authorName[0] || '匿'}}</text>
+        </view>
+        <view class="feed-author-info">
+          <text class="feed-author-name">{{item.authorName}}</text>
+          <text class="feed-time">{{item.createdAt}}</text>
+        </view>
+      </view>
+      <text class="feed-content">{{item.content}}</text>
+      <view class="feed-card-footer">
+        <view class="like-btn" bindtap="onLikePost" data-id="{{item._id}}">
+          <text class="like-icon">👍</text>
+          <text class="like-count">{{item.likes || 0}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{loading}}" class="loading-box">
+      <text class="loading-text">加载更多...</text>
+    </view>
+    <view wx:elif="{{!hasMore}}" class="loading-box">
+      <text class="loading-text">没有更多了</text>
+    </view>
+  </block>
+</view>

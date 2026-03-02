@@ -1,0 +1,37 @@
+<view class="news-detail-page">
+  <view wx:if="{{loading}}" class="loading-box">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <block wx:elif="{{news}}">
+    <!-- 防诈骗提示 -->
+    <view class="anti-fraud-banner">
+      <text class="anti-fraud-text">
+        温馨提示：请通过正规渠道获取信息，不轻信不明来源的消息
+      </text>
+    </view>
+
+    <!-- 文章头部 -->
+    <view class="article-header">
+      <text class="article-category tag tag-primary">{{news.category}}</text>
+      <text class="article-title">{{news.title}}</text>
+      <view class="article-meta">
+        <text class="article-source">来源：{{news.source || '资讯'}}</text>
+        <text class="article-date">{{news.createdAt}}</text>
+      </view>
+    </view>
+
+    <!-- 文章正文 -->
+    <view class="article-body">
+      <rich-text nodes="{{news.content}}" space="nbsp" class="article-content"></rich-text>
+    </view>
+
+    <!-- 查看原文按钮 -->
+    <view class="action-buttons">
+      <button class="btn-primary" bindtap="viewOriginal">
+        查看完整原文
+      </button>
+    </view>
+
+  </block>
+</view>

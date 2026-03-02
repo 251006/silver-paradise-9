@@ -1,0 +1,91 @@
+<!-- pages/community/index.wxml -->
+<view class="container">
+  <!-- Tab切换 -->
+  <view class="tab-bar">
+    <view 
+      class="tab-item {{activeTab === 0 ? 'active' : ''}}" 
+      data-index="0" 
+      bindtap="onTabChange">
+      <text class="tab-text">长辈动态</text>
+      <view class="tab-line" wx:if="{{activeTab === 0}}"></view>
+    </view>
+    <view 
+      class="tab-item {{activeTab === 1 ? 'active' : ''}}" 
+      data-index="1" 
+      bindtap="onTabChange">
+      <text class="tab-text">社区问答</text>
+      <view class="tab-line" wx:if="{{activeTab === 1}}"></view>
+    </view>
+  </view>
+
+  <!-- 动态列表 -->
+  <view class="content" wx:if="{{activeTab === 0}}">
+    <view class="post-list">
+      <view class="post-card" wx:for="{{posts}}" wx:key="_id">
+        <view class="post-header">
+          <view class="avatar">{{item.authorName ? item.authorName[0] : '长'}}</view>
+          <view class="post-info">
+            <text class="author-name">{{item.authorName || '匿名长辈'}}</text>
+            <text class="post-time">{{formatTime(item.createdAt)}}</text>
+          </view>
+        </view>
+        <view class="post-content">{{item.content}}</view>
+        <view class="post-footer">
+          <view 
+            class="like-btn {{item.liked ? 'liked' : ''}}" 
+            data-id="{{item._id}}" 
+            data-index="{{index}}"
+            bindtap="onLikePost">
+            <text class="icon">{{item.liked ? '❤️' : '🤍'}}</text>
+            <text class="like-count">{{item.likes || 0}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="empty-tip" wx:if="{{!postsLoading && posts.length === 0}}">
+        <text>暂无动态，期待长辈们的分享～</text>
+      </view>
+
+      <view class="loading-tip" wx:if="{{postsLoading}}">
+        <text>加载中...</text>
+      </view>
+    </view>
+
+    <!-- 发布动态按钮（仅老人可见） -->
+    <view class="float-btn" wx:if="{{role === 'elder'}}" bindtap="goPublishPost">
+      <text class="float-icon">+</text>
+    </view>
+  </view>
+
+  <!-- 问答列表 -->
+  <view class="content" wx:if="{{activeTab === 1}}">
+    <view class="question-list">
+      <view class="question-card" wx:for="{{questions}}" wx:key="_id" bindtap="goQuestionDetail" data-id="{{item._id}}">
+        <view class="question-header">
+          <text class="question-title">{{item.title}}</text>
+          <view class="answer-badge">
+            <text>{{item.answerCount || 0}}个回答</text>
+          </view>
+        </view>
+        <view class="question-content" wx:if="{{item.content}}">{{item.content}}</view>
+        <view class="question-footer">
+          <text class="author-name">{{item.authorName}}</text>
+          <text class="question-time">{{formatTime(item.createdAt)}}</text>
+        </view>
+      </view>
+
+      <view class="empty-tip" wx:if="{{!questionsLoading && questions.length === 0}}">
+        <text>还没有人提问，快来提第一个问题吧～</text>
+      </view>
+
+      <view class="loading-tip" wx:if="{{questionsLoading}}">
+        <text>加载中...</text>
+      </view>
+    </view>
+
+    <!-- 提问按钮（仅年轻人可见） -->
+    <view class="float-btn" wx:if="{{role === 'young'}}" bindtap="goAsk">
+      <text class="float-icon">+</text>
+    </view>
+  </view>
+</view>

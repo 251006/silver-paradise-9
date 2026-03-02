@@ -1,0 +1,78 @@
+<view class="detail-page">
+  <view wx:if="{{loading}}" class="loading-box">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <block wx:elif="{{question}}">
+    <!-- 问题卡片 -->
+    <view class="question-card card">
+      <text class="question-title">{{question.title}}</text>
+      <text wx:if="{{question.content}}" class="question-content">
+        {{question.content}}
+      </text>
+      <view class="question-meta">
+        <text class="meta-author">{{question.authorName}} 提问</text>
+        <text class="meta-time">{{question.createdAt}}</text>
+      </view>
+    </view>
+
+    <!-- 回答列表 -->
+    <view class="answers-section">
+      <text class="answers-title">
+        回答 ({{answers.length}})
+      </text>
+
+      <view wx:if="{{answers.length === 0}}" class="empty-state">
+        <text class="empty-state-text">暂无回答，等待长辈分享经验</text>
+      </view>
+
+      <view wx:for="{{answers}}" wx:key="_id" class="answer-card card">
+        <view class="answer-header">
+          <view class="answer-avatar">
+            <text class="answer-avatar-text">{{item.authorName[0] || '匿'}}</text>
+          </view>
+          <view class="answer-author-info">
+            <text class="answer-author-name">{{item.authorName}}</text>
+            <text class="answer-time">{{item.createdAt}}</text>
+          </view>
+        </view>
+        <text class="answer-content">{{item.content}}</text>
+        <view class="answer-footer">
+          <view
+            class="thank-btn"
+            bindtap="onLikeAnswer"
+            data-id="{{item._id}}"
+          >
+            <text class="thank-icon">🙏</text>
+            <text class="thank-text">感谢 ({{item.likes || 0}})</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 老人用户的回答输入区 -->
+    <view wx:if="{{role === 'elder'}}" class="answer-input-section">
+      <view class="answer-input-header">
+        <text class="answer-input-title">分享您的经验</text>
+      </view>
+      <textarea
+        class="answer-textarea"
+        placeholder="用您的人生经验来回答这个问题吧..."
+        placeholder-style="color: #CCCCCC; font-size: 32rpx;"
+        value="{{answerContent}}"
+        bindinput="onAnswerInput"
+        maxlength="1000"
+        auto-height
+      />
+      <view class="answer-input-actions">
+        <button
+          class="submit-answer-btn btn btn-primary"
+          bindtap="submitAnswer"
+          disabled="{{submitting || !answerContent.trim()}}"
+        >
+          {{submitting ? '提交中...' : '提交回答'}}
+        </button>
+      </view>
+    </view>
+  </block>
+</view>

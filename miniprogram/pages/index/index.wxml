@@ -1,0 +1,62 @@
+﻿<!--index.wxml - 银龄乐园首页-->
+<view class="home-page safe-bottom">
+  <!-- 欢迎区域 -->
+  <view class="welcome-section">
+    <view class="welcome-content">
+      <text class="welcome-hello">
+        {{role === 'elder' ? '您好' : '你好'}}，{{nickname}}
+      </text>
+      <text class="welcome-msg">
+        {{role === 'elder' ? '今天又是美好的一天，来看看有什么新鲜事吧！' : '今天来和长辈们互动一下吧！'}}
+      </text>
+    </view>
+  </view>
+
+  <!-- 功能入口卡片 -->
+  <view class="entries-section">
+    <text class="section-title">功能入口</text>
+
+    <block wx:if="{{role === 'elder'}}">
+      <view
+        wx:for="{{elderEntries}}"
+        wx:key="title"
+        class="entry-card"
+        bindtap="onEntryTap"
+        data-url="{{item.url}}"
+      >
+        <view class="entry-icon-wrap" style="background: {{item.color}}20;">
+          <text class="entry-icon">{{item.icon}}</text>
+        </view>
+        <view class="entry-text">
+          <text class="entry-title">{{item.title}}</text>
+          <text class="entry-desc">{{item.desc}}</text>
+        </view>
+        <text class="entry-arrow">></text>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view
+        wx:for="{{youngEntries}}"
+        wx:key="title"
+        class="entry-card"
+        bindtap="onEntryTap"
+        data-url="{{item.url}}"
+      >
+        <view class="entry-icon-wrap" style="background: {{item.color}}20;">
+          <text class="entry-icon">{{item.icon}}</text>
+        </view>
+        <view class="entry-text">
+          <text class="entry-title">{{item.title}}</text>
+          <text class="entry-desc">{{item.desc}}</text>
+        </view>
+        <text class="entry-arrow">></text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 温馨提示 -->
+  <view class="tip-banner">
+    <text class="tip-text">温馨提示：不轻信陌生来电，不向陌生人转账</text>
+  </view>
+</view>

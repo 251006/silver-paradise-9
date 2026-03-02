@@ -1,0 +1,41 @@
+<view class="ask-page">
+  <view class="ask-header">
+    <text class="ask-title">向长辈提问</text>
+    <text class="ask-subtitle">写下你的问题，让长辈们分享经验</text>
+  </view>
+
+  <!-- 标题输入 -->
+  <view class="form-group">
+    <text class="form-label">问题标题 <text class="required">*</text></text>
+    <input
+      class="form-input input-field"
+      placeholder="用一句话概括您的问题"
+      maxlength="50"
+      value="{{title}}"
+      bindinput="onTitleInput"
+    />
+  </view>
+
+  <!-- 详情输入 -->
+  <view class="form-group">
+    <text class="form-label">问题详情（选填）</text>
+    <textarea
+      class="form-textarea textarea-field"
+      placeholder="补充描述问题的背景和具体情况..."
+      placeholder-style="color: #CCCCCC;"
+      maxlength="500"
+      value="{{content}}"
+      bindinput="onContentInput"
+      auto-height
+    />
+  </view>
+
+  <!-- 提交按钮 -->
+  <button
+    class="submit-btn btn btn-primary btn-block"
+    bindtap="submitQuestion"
+    disabled="{{submitting || !title.trim()}}"
+  >
+    {{submitting ? '提交中...' : '发布问题'}}
+  </button>
+</view>

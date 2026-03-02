@@ -1,0 +1,31 @@
+<view class="publish-page">
+  <view class="publish-header">
+    <text class="publish-title">写下您的心情或生活感悟</text>
+  </view>
+
+  <!-- 内容输入区 -->
+  <view class="input-area">
+    <textarea
+      class="content-textarea"
+      placeholder="在这里写下您想分享的内容..."
+      placeholder-style="color: #CCCCCC; font-size: 34rpx;"
+      maxlength="500"
+      value="{{content}}"
+      bindinput="onContentInput"
+      auto-height
+      show-confirm-bar="{{false}}"
+    />
+    <view class="char-count">
+      <text>{{content.length}}/500</text>
+    </view>
+  </view>
+
+  <!-- 发布按钮 -->
+  <button
+    class="submit-btn btn btn-primary btn-block"
+    bindtap="submitPost"
+    disabled="{{submitting || !content.trim()}}"
+  >
+    {{submitting ? '发布中...' : '发布动态'}}
+  </button>
+</view>

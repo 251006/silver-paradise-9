@@ -1,0 +1,64 @@
+<view class="identity-page">
+  <view class="welcome-header">
+    <text class="welcome-title">银龄乐园</text>
+    <text class="welcome-subtitle">请选择您的身份，开始使用</text>
+  </view>
+
+  <!-- 身份选择卡片 -->
+  <view class="role-cards">
+    <view
+      class="role-card {{selectedRole === 'elder' ? 'role-card-selected' : ''}}"
+      bindtap="selectRole"
+      data-role="elder"
+    >
+      <view class="role-icon">👴</view>
+      <text class="role-name">我是长辈</text>
+      <text class="role-desc">发布动态、回答问题、记录回忆</text>
+    </view>
+
+    <view
+      class="role-card {{selectedRole === 'young' ? 'role-card-selected' : ''}}"
+      bindtap="selectRole"
+      data-role="young"
+    >
+      <view class="role-icon">👦</view>
+      <text class="role-name">我是年轻人</text>
+      <text class="role-desc">向长辈提问、浏览长辈动态</text>
+    </view>
+  </view>
+
+  <!-- 头像选择 -->
+  <view class="avatar-section">
+    <text class="avatar-label">您的头像</text>
+    <button
+      class="avatar-wrapper"
+      open-type="chooseAvatar"
+      bindchooseavatar="onChooseAvatar"
+    >
+      <image class="avatar-image" src="{{avatarUrl}}"></image>
+    </button>
+    <text class="avatar-hint">点击选择头像</text>
+  </view>
+
+  <!-- 昵称输入 -->
+  <view class="nickname-section">
+    <text class="nickname-label">您的昵称</text>
+    <input
+      class="nickname-input"
+      type="nickname"
+      placeholder="请输入昵称（最多12个字）"
+      maxlength="12"
+      value="{{nickname}}"
+      bindinput="onNicknameInput"
+    />
+  </view>
+
+  <!-- 进入按钮 -->
+  <button
+    class="enter-btn {{selectedRole && nickname && avatarUrl ? 'enter-btn-active' : ''}}"
+    bindtap="onEnter"
+    disabled="{{submitting}}"
+  >
+    {{submitting ? '正在微信登录...' : '微信登录并进入'}}
+  </button>
+</view>

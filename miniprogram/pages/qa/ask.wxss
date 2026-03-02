@@ -1,0 +1,59 @@
+/* pages/qa/ask.wxss */
+.ask-page {
+  padding: 32rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.ask-header {
+  margin-bottom: 40rpx;
+}
+
+.ask-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 8rpx;
+}
+
+.ask-subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: #999999;
+}
+
+.form-group {
+  margin-bottom: 32rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 16rpx;
+}
+
+.required {
+  color: #FF4D4F;
+}
+
+.form-input {
+  height: 96rpx;
+  font-size: 32rpx;
+}
+
+.form-textarea {
+  min-height: 240rpx;
+  font-size: 32rpx;
+}
+
+.submit-btn {
+  margin-top: 48rpx;
+}
+
+.submit-btn[disabled] {
+  background: #CCCCCC !important;
+  opacity: 0.6;
+}

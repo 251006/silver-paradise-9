@@ -1,0 +1,25 @@
+<view class="detail-page">
+  <view wx:if="{{loading}}" class="loading-box">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <block wx:elif="{{memoir}}">
+    <view class="detail-header">
+      <text class="detail-title">{{memoir.title}}</text>
+      <text class="detail-time">{{memoir.createdAt}}</text>
+    </view>
+
+    <view class="detail-body">
+      <text class="detail-content" user-select>{{memoir.content}}</text>
+    </view>
+
+    <!-- 素材来源 -->
+    <view wx:if="{{memoir.materialCount > 0}}" class="detail-footer">
+      <text class="footer-label">本篇回忆录由 AI 根据 {{memoir.materialCount}} 条动态生成</text>
+    </view>
+  </block>
+
+  <view wx:else class="empty-state">
+    <text class="empty-state-text">回忆录不存在</text>
+  </view>
+</view>

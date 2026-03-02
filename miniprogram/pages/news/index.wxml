@@ -1,0 +1,55 @@
+<view class="news-page safe-bottom">
+  <!-- 分类筛选 -->
+  <scroll-view class="category-bar" scroll-x enable-flex>
+    <view
+      wx:for="{{categories}}"
+      wx:key="*this"
+      class="category-item {{currentCategory === item ? 'category-active' : ''}}"
+      bindtap="switchCategory"
+      data-category="{{item}}"
+    >
+      <text>{{item}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- 资讯列表 -->
+  <view class="news-list">
+    <view wx:if="{{loading && newsList.length === 0}}" class="loading-box">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view wx:elif="{{newsList.length === 0}}" class="empty-state">
+      <text class="empty-state-text">暂无资讯</text>
+    </view>
+
+    <block wx:else>
+      <view
+        wx:for="{{newsList}}"
+        wx:key="_id"
+        class="news-card card"
+        bindtap="goDetail"
+        data-index="{{index}}"
+        data-id="{{item._id}}"
+        data-url="{{item.url}}"
+      >
+        <view class="news-card-top">
+          <text class="news-tag tag tag-primary">{{item.category}}</text>
+          <text class="news-date">{{item.createdAt}}</text>
+        </view>
+        <text class="news-title">{{item.title}}</text>
+        <text class="news-summary">{{item.summary}}</text>
+        <view class="news-footer">
+          <text class="news-source">{{item.source}}</text>
+          <text class="news-date">{{item.createdAt}}</text>
+        </view>
+      </view>
+
+      <view wx:if="{{loading}}" class="loading-box">
+        <text class="loading-text">加载更多...</text>
+      </view>
+      <view wx:elif="{{!hasMore}}" class="loading-box">
+        <text class="loading-text">没有更多了</text>
+      </view>
+    </block>
+  </view>
+</view>

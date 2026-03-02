@@ -1,0 +1,415 @@
+/* pages/profile/index.wxss */
+.profile-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  background: #FFFFFF;
+  position: relative;
+}
+
+/* 顶部背景 */
+.profile-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 400rpx;
+  background: linear-gradient(180deg, #FFF8F0 0%, #FFFFFF 100%);
+  z-index: 0;
+}
+
+/* 用户信息区 */
+.user-header {
+  position: relative;
+  z-index: 1;
+  padding: 60rpx 32rpx 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* 头像容器 */
+.avatar-container {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 80rpx;
+  overflow: hidden;
+  border: 6rpx solid #FFFFFF;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 用户信息 */
+.user-info {
+  margin-left: 24rpx;
+  padding-top: 12rpx;
+  flex: 1;
+}
+
+.user-name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.user-name {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.user-id-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.user-id-label {
+  font-size: 26rpx;
+  color: #666666;
+}
+
+.user-id {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+.user-location {
+  display: flex;
+  align-items: center;
+}
+
+.location-icon {
+  font-size: 24rpx;
+  margin-right: 8rpx;
+}
+
+.location-text {
+  font-size: 26rpx;
+  color: #666666;
+}
+
+/* 简介区域 */
+.bio-section {
+  position: relative;
+  z-index: 1;
+  padding: 24rpx 32rpx;
+}
+
+.bio-hint {
+  font-size: 28rpx;
+  color: #AAAAAA;
+}
+
+/* 统计数据 */
+.stats-section {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  padding: 24rpx 32rpx;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8rpx;
+}
+
+.stat-label {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+/* 功能卡片 */
+.function-cards {
+  position: relative;
+  z-index: 1;
+  padding: 24rpx 32rpx;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+}
+
+.function-card {
+  background: #F8F8F8;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.function-card:nth-child(3) {
+  grid-column: 1 / 3;
+}
+
+.function-card:active {
+  background: #F0F0F0;
+  transform: scale(0.98);
+}
+
+.function-icon {
+  font-size: 48rpx;
+  margin-right: 16rpx;
+}
+
+.function-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.function-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 4rpx;
+}
+
+.function-desc {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+/* 标签页 */
+.tab-bar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  background: #FFFFFF;
+  border-bottom: 1rpx solid #F0F0F0;
+  margin-top: 20rpx;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  position: relative;
+}
+
+.tab-text {
+  font-size: 30rpx;
+  color: #666666;
+}
+
+.tab-active .tab-text {
+  color: #333333;
+  font-weight: 600;
+}
+
+.tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 6rpx;
+  background: #E8713A;
+  border-radius: 3rpx;
+}
+
+/* 动态列表区域 */
+.section-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx 16rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.section-count {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+.loading-box {
+  padding: 60rpx 0;
+  text-align: center;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999999;
+}
+
+.empty-state {
+  padding: 100rpx 0;
+  text-align: center;
+}
+
+.empty-state-text {
+  font-size: 28rpx;
+  color: #AAAAAA;
+}
+
+.post-card {
+  position: relative;
+  z-index: 1;
+  margin: 0 32rpx 20rpx;
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.post-content {
+  font-size: 30rpx;
+  color: #333333;
+  line-height: 1.6;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.post-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #F0F0F0;
+}
+
+.post-time {
+  font-size: 24rpx;
+  color: #CCCCCC;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.action-item:active {
+  background: #F5F5F5;
+}
+
+.action-icon {
+  font-size: 32rpx;
+  margin-right: 8rpx;
+}
+
+.action-count {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+.memoir-btn {
+  background: #FFF0E6;
+  border-radius: 12rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  color: #E8713A;
+  font-weight: 500;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.section-count {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+.post-card {
+  margin-bottom: 20rpx;
+}
+
+.post-content {
+  font-size: 32rpx;
+  color: #333333;
+  line-height: 1.8;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.post-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #F0F0F0;
+}
+
+.post-time {
+  font-size: 24rpx;
+  color: #CCCCCC;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.action-item:active {
+  background: #F5F5F5;
+}
+
+.action-icon {
+  font-size: 32rpx;
+  margin-right: 8rpx;
+}
+
+.action-count {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+.memoir-btn {
+  background: #FFF0E6;
+  border-radius: 12rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  color: #E8713A;
+  font-weight: 500;
+}

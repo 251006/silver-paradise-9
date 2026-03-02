@@ -1,0 +1,59 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/identity/index",
+    "pages/news/index",
+    "pages/news/detail",
+    "pages/community/index",
+    "pages/qa/detail",
+    "pages/qa/ask",
+    "pages/profile/index",
+    "pages/post/publish",
+    "pages/memoir/index",
+    "pages/memoir/detail",
+    "pages/memoir/create"
+  ],
+  "window": {
+    "backgroundColor": "#FFF8F0",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#E8713A",
+    "navigationBarTitleText": "银龄乐园",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#7A7A7A",
+    "selectedColor": "#E8713A",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/icons/home.png",
+        "selectedIconPath": "images/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/news/index",
+        "text": "资讯",
+        "iconPath": "images/icons/examples.png",
+        "selectedIconPath": "images/icons/examples-active.png"
+      },
+      {
+        "pagePath": "pages/community/index",
+        "text": "社区",
+        "iconPath": "images/icons/business.png",
+        "selectedIconPath": "images/icons/business-active.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "images/icons/usercenter.png",
+        "selectedIconPath": "images/icons/usercenter-active.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents"
+}

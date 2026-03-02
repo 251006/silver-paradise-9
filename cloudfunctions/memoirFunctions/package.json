@@ -1,0 +1,9 @@
+{
+  "name": "memoirFunctions",
+  "version": "1.0.0",
+  "description": "回忆录管理云函数（含AI生成）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

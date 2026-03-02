@@ -1,0 +1,179 @@
+/* pages/news/detail.wxss */
+.news-detail-page {
+  padding-bottom: 200rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 防诈骗提示 */
+.anti-fraud-banner {
+  padding: 20rpx 32rpx;
+  background: #FFF3E0;
+  border-bottom: 2rpx solid #FFE0B2;
+}
+
+.anti-fraud-text {
+  font-size: 26rpx;
+  color: #E65100;
+  line-height: 1.5;
+}
+
+/* 文章头部 */
+.article-header {
+  padding: 32rpx;
+}
+
+.article-category {
+  margin-bottom: 20rpx;
+}
+
+.article-title {
+  display: block;
+  font-size: 42rpx;
+  font-weight: 700;
+  color: #333333;
+  line-height: 1.5;
+  margin-bottom: 20rpx;
+}
+
+.article-meta {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #F0F0F0;
+}
+
+.article-source {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+.article-date {
+  font-size: 26rpx;
+  color: #CCCCCC;
+}
+
+/* 文章正文 */
+.article-body {
+  padding: 24rpx 32rpx 32rpx;
+  background: #FFFFFF;
+  min-height: 400rpx;
+}
+
+.article-content {
+  font-size: 32rpx;
+  color: #333333;
+  line-height: 1.8;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* rich-text 基础样式 */
+rich-text {
+  display: block;
+  width: 100%;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  padding: 32rpx;
+  margin-top: 24rpx;
+}
+
+.btn-primary {
+  width: 100%;
+  height: 88rpx;
+  background: linear-gradient(135deg, #E8713A, #F5A623);
+  color: #FFFFFF;
+  font-size: 32rpx;
+  font-weight: 600;
+  border-radius: 16rpx;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+/* TTS 朗读控制栏 */
+.tts-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.08);
+  z-index: 100;
+}
+
+.tts-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.tts-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 24rpx;
+  border-radius: 16rpx;
+  min-width: 120rpx;
+}
+
+.tts-btn:active {
+  opacity: 0.7;
+}
+
+.tts-play {
+  background: linear-gradient(135deg, #E8713A, #F5A623);
+}
+
+.tts-play .tts-btn-icon,
+.tts-play .tts-btn-text {
+  color: #FFFFFF;
+}
+
+.tts-pause {
+  background: #FFF0E6;
+}
+
+.tts-pause .tts-btn-icon,
+.tts-pause .tts-btn-text {
+  color: #E8713A;
+}
+
+.tts-stop {
+  background: #F5F5F5;
+}
+
+.tts-stop .tts-btn-icon,
+.tts-stop .tts-btn-text {
+  color: #666666;
+}
+
+.tts-btn-icon {
+  font-size: 36rpx;
+  margin-bottom: 4rpx;
+}
+
+.tts-btn-text {
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.tts-speed {
+  background: #E8F5E9;
+}
+
+.tts-speed-text {
+  font-size: 28rpx;
+  color: #2E7D32;
+  font-weight: 600;
+}

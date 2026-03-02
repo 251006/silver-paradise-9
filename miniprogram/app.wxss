@@ -1,0 +1,249 @@
+/**app.wxss - 银龄乐园全局样式 - 适老化设计**/
+
+/* ========== CSS 变量定义 ========== */
+page {
+  --color-primary: #E8713A;
+  --color-primary-light: #F5A623;
+  --color-primary-dark: #C85A20;
+  --color-bg: #FFF8F0;
+  --color-bg-card: #FFFFFF;
+  --color-text-primary: #333333;
+  --color-text-secondary: #666666;
+  --color-text-hint: #999999;
+  --color-border: #E8E8E8;
+  --color-success: #52C41A;
+  --color-danger: #FF4D4F;
+  --color-warning: #FAAD14;
+
+  --font-size-xs: 14px;
+  --font-size-sm: 16px;
+  --font-size-base: 18px;
+  --font-size-lg: 20px;
+  --font-size-xl: 22px;
+  --font-size-xxl: 26px;
+  --font-size-title: 28px;
+
+  --btn-min-height: 60px;
+  --card-radius: 16rpx;
+  --spacing-xs: 8rpx;
+  --spacing-sm: 16rpx;
+  --spacing-md: 24rpx;
+  --spacing-lg: 32rpx;
+  --spacing-xl: 48rpx;
+
+  background: var(--color-bg);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  line-height: 1.6;
+}
+
+/* ========== 通用容器 ========== */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+  padding: var(--spacing-lg);
+  min-height: 100vh;
+}
+
+/* ========== 适老化按钮 ========== */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--btn-min-height);
+  border-radius: 12rpx;
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  padding: 0 var(--spacing-lg);
+  border: none;
+  line-height: 1.4;
+}
+
+.btn::after {
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: #FFFFFF;
+}
+
+.btn-primary:active {
+  opacity: 0.85;
+}
+
+.btn-secondary {
+  background: var(--color-bg-card);
+  color: var(--color-primary);
+  border: 2rpx solid var(--color-primary);
+}
+
+.btn-secondary:active {
+  background: #FFF0E6;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-large {
+  min-height: 80rpx;
+  font-size: var(--font-size-xl);
+  border-radius: 16rpx;
+  padding: var(--spacing-md) var(--spacing-xl);
+}
+
+/* ========== 卡片组件 ========== */
+.card {
+  background: var(--color-bg-card);
+  border-radius: var(--card-radius);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.card-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.card-content {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+}
+
+/* ========== 输入框 ========== */
+.input-field {
+  width: 100%;
+  min-height: var(--btn-min-height);
+  padding: var(--spacing-md);
+  font-size: var(--font-size-base);
+  border: 2rpx solid var(--color-border);
+  border-radius: 12rpx;
+  box-sizing: border-box;
+  background: var(--color-bg-card);
+}
+
+.input-field:focus {
+  border-color: var(--color-primary);
+}
+
+.textarea-field {
+  width: 100%;
+  min-height: 200rpx;
+  padding: var(--spacing-md);
+  font-size: var(--font-size-base);
+  border: 2rpx solid var(--color-border);
+  border-radius: 12rpx;
+  box-sizing: border-box;
+  background: var(--color-bg-card);
+  line-height: 1.8;
+}
+
+/* ========== 标签 ========== */
+.tag {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  font-size: var(--font-size-xs);
+  border-radius: 8rpx;
+  margin-right: var(--spacing-xs);
+}
+
+.tag-primary {
+  background: #FFF0E6;
+  color: var(--color-primary);
+}
+
+.tag-gray {
+  background: #F5F5F5;
+  color: var(--color-text-hint);
+}
+
+/* ========== 分割线 ========== */
+.divider {
+  height: 1rpx;
+  background: var(--color-border);
+  margin: var(--spacing-md) 0;
+}
+
+/* ========== 空状态 ========== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl) 0;
+  color: var(--color-text-hint);
+}
+
+.empty-state-text {
+  font-size: var(--font-size-lg);
+  margin-top: var(--spacing-md);
+}
+
+/* ========== 加载状态 ========== */
+.loading-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl) 0;
+}
+
+.loading-text {
+  font-size: var(--font-size-base);
+  color: var(--color-text-hint);
+  margin-left: var(--spacing-sm);
+}
+
+/* ========== 安全区域适配 ========== */
+.safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 120rpx);
+}
+
+/* ========== 浮动按钮 ========== */
+.fab {
+  position: fixed;
+  right: 40rpx;
+  bottom: 200rpx;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  box-shadow: 0 8rpx 24rpx rgba(232, 113, 58, 0.4);
+  z-index: 100;
+}
+
+.fab:active {
+  transform: scale(0.92);
+}
+
+/* ========== 重置默认按钮样式 ========== */
+button {
+  background: initial;
+  padding: 0;
+  margin: 0;
+  line-height: inherit;
+  font-size: inherit;
+}
+
+button:focus {
+  outline: 0;
+}
+
+button::after {
+  border: none;
+}
+
+/* ========== Rich Text 新闻内容全局样式 ========== */
+/* rich-text组件渲染的HTML内容样式控制 */

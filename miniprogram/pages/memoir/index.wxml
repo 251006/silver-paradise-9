@@ -1,0 +1,41 @@
+<view class="memoir-page">
+  <view class="memoir-header">
+    <text class="memoir-title">我的回忆录</text>
+    <text class="memoir-subtitle">记录人生中的美好瞬间</text>
+  </view>
+
+  <!-- 新建按钮 -->
+  <button class="create-btn btn btn-primary btn-block" bindtap="goCreate">
+    新建回忆录
+  </button>
+
+  <!-- 回忆录列表 -->
+  <view wx:if="{{loading}}" class="loading-box">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view wx:elif="{{memoirs.length === 0}}" class="empty-state">
+    <text class="empty-icon">📖</text>
+    <text class="empty-state-text">还没有回忆录</text>
+    <text class="empty-hint">点击上方按钮，开始记录您的人生故事</text>
+  </view>
+
+  <block wx:else>
+    <view wx:for="{{memoirs}}" wx:key="_id" class="memoir-card card">
+      <view class="memoir-card-main" bindtap="goDetail" data-id="{{item._id}}">
+        <text class="memoir-card-title">{{item.title || '无标题回忆'}}</text>
+        <text class="memoir-card-content">
+          {{item.content.length > 80 ? item.content.substring(0, 80) + '...' : item.content}}
+        </text>
+        <text class="memoir-card-time">{{item.createdAt}}</text>
+      </view>
+      <view
+        class="memoir-delete"
+        catchtap="onDeleteMemoir"
+        data-id="{{item._id}}"
+      >
+        <text class="delete-text">删除</text>
+      </view>
+    </view>
+  </block>
+</view>

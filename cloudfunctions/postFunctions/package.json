@@ -1,0 +1,9 @@
+{
+  "name": "postFunctions",
+  "version": "1.0.0",
+  "description": "动态管理云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}
