@@ -161,6 +161,36 @@ async function getUserNames(event) {
   }
 }
 
+// 更新用户资料
+async function updateProfile(event, wxContext) {
+  const openid = wxContext.OPENID;
+  const { nickname, avatarUrl } = event;
+
+  if (!nickname || !nickname.trim()) {
+    return { code: -1, message: "昵称不能为空" };
+  }
+
+  try {
+    const updateData = {
+      nickname: normalizeNickname(nickname),
+      updatedAt: db.serverDate(),
+    };
+
+    if (avatarUrl) {
+      updateData.avatarUrl = avatarUrl;
+    }
+
+    await db.collection("users").doc(openid).update({
+      data: updateData,
+    });
+
+    return { code: 0, message: "更新成功" };
+  } catch (err) {
+    console.error("updateProfile error:", err);
+    return { code: -1, message: "更新失败" };
+  }
+}
+
 // 主入口路由
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
@@ -174,6 +204,8 @@ exports.main = async (event, context) => {
       return getUser(event, wxContext);
     case "getUserNames":
       return getUserNames(event);
+    case "updateProfile":
+      return updateProfile(event, wxContext);
     default:
       return { code: -1, msg: "未知操作类型" };
   }

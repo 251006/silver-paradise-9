@@ -77,18 +77,20 @@ async function listNews(event) {
       };
     }
 
-    // 转换数据格式，适配前端期望
+    // 转换数据格式，适配前端期望和数据库文档
     const resultData = result.result && result.result.data ? result.result.data : [];
-    const newsList = resultData.map((item, index) => ({
-      _id: `juhe-${Date.now()}-${index}`,
+    const newsList = resultData.map((item) => ({
+      _id: `news_${item.uniquekey || Date.now()}`,
       uniquekey: item.uniquekey || "", // 新闻唯一ID，用于获取详情
       title: item.title || "未知标题",
       summary: item.summary || item.title || "无摘要",
-      category: category,
-      image: item.thumbnail_pic_s || item.thumbnail_pic_s02 || item.thumbnail_pic_s03 || "",
+      content: "", // 列表视图不返回完整内容，通过getNews获取
+      category: category === "全部" ? "headlines" : category.toLowerCase(),
+      imageUrl: item.thumbnail_pic_s || item.thumbnail_pic_s02 || item.thumbnail_pic_s03 || "",
+      sourceUrl: item.url || "",
       source: item.author_name || "聚合数据",
-      url: item.url || "", // 原始新闻链接
-      createdAt: item.date || new Date().toISOString(),
+      publishedAt: new Date(item.date || new Date()),
+      fetchedAt: new Date(),
     }));
 
     const totalPage = result.result && result.result.totalPage ? result.result.totalPage : 0;
@@ -108,7 +110,7 @@ async function listNews(event) {
 }
 
 // 获取资讯详情
-async function getNewsDetail(event) {
+async function getNews(event) {
   const { uniquekey } = event;
 
   try {
@@ -139,7 +141,7 @@ async function getNewsDetail(event) {
       };
     }
 
-    // 转换数据格式
+    // 转换数据格式，符合数据库文档的news表结构
     const newsDetail = result.result || {};
     const detail = newsDetail.detail || {};
     
@@ -162,21 +164,26 @@ async function getNewsDetail(event) {
     content = content.replace(/<p>/g, '<p style="margin-bottom:15px;line-height:1.8;text-align:justify;color:#333">');
     content = content.replace(/<p /g, '<p style="margin-bottom:15px;line-height:1.8;text-align:justify;color:#333" ');
     
+    const summary = (detail.summary || detail.title || "无摘要").substring(0, 100);
+    
     return {
       code: 0,
       news: {
+        _id: `news_${uniquekey}`,
         uniquekey: newsDetail.uniquekey,
         title: detail.title || "未知标题",
+        summary: summary,
         content: content,
-        category: detail.category || "",
+        category: detail.category || "news",
+        imageUrl: detail.thumbnail_pic_s || detail.image || "",
+        sourceUrl: detail.url || "",
         source: detail.author_name || "聚合数据",
-        url: detail.url || "",
-        image: detail.thumbnail_pic_s || "",
-        createdAt: detail.date || new Date().toISOString(),
+        publishedAt: new Date(detail.date || new Date()),
+        fetchedAt: new Date(),
       },
     };
   } catch (err) {
-    console.error("getNewsDetail error:", err);
+    console.error("getNews error:", err);
     return { 
       code: -1, 
       msg: err.message || "获取详情失败" 
@@ -189,8 +196,8 @@ exports.main = async (event, context) => {
   switch (event.type) {
     case "listNews":
       return listNews(event);
-    case "getNewsDetail":
-      return getNewsDetail(event);
+    case "getNews":
+      return getNews(event);
     default:
       return { code: -1, msg: "未知操作类型" };
   }

@@ -1,24 +1,32 @@
 <view class="ask-page">
-  <view class="ask-header">
+  <view class="ask-header card">
     <text class="ask-title">向长辈提问</text>
-    <text class="ask-subtitle">写下你的问题，让长辈们分享经验</text>
+    <text class="ask-subtitle">写清场景和困惑，更容易获得高质量回答</text>
+    <view class="ask-tips">
+      <text>· 标题尽量具体，避免“怎么办”这类模糊描述</text>
+      <text>· 描述你的背景信息，回答会更有针对性</text>
+    </view>
   </view>
 
-  <!-- 标题输入 -->
-  <view class="form-group">
-    <text class="form-label">问题标题 <text class="required">*</text></text>
+  <view class="form-group card">
+    <view class="form-label-row">
+      <text class="form-label">问题标题 <text class="required">*</text></text>
+      <text class="count-text">{{titleCount}}/50</text>
+    </view>
     <input
       class="form-input input-field"
-      placeholder="用一句话概括您的问题"
+      placeholder="例如：如何和父母沟通职业选择分歧？"
       maxlength="50"
       value="{{title}}"
       bindinput="onTitleInput"
     />
   </view>
 
-  <!-- 详情输入 -->
-  <view class="form-group">
-    <text class="form-label">问题详情（选填）</text>
+  <view class="form-group card">
+    <view class="form-label-row">
+      <text class="form-label">问题详情（选填）</text>
+      <text class="count-text">{{contentCount}}/500</text>
+    </view>
     <textarea
       class="form-textarea textarea-field"
       placeholder="补充描述问题的背景和具体情况..."
@@ -30,11 +38,10 @@
     />
   </view>
 
-  <!-- 提交按钮 -->
   <button
     class="submit-btn btn btn-primary btn-block"
     bindtap="submitQuestion"
-    disabled="{{submitting || !title.trim()}}"
+    disabled="{{submitting || !canSubmit}}"
   >
     {{submitting ? '提交中...' : '发布问题'}}
   </button>

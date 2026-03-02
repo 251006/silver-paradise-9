@@ -36,31 +36,49 @@ Page({
 
   // 加载当前Tab数据
   loadCurrentTabData() {
+    console.log("loadCurrentTabData 当前 activeTab:", this.data.activeTab);
+    
     if (this.data.activeTab === 0) {
-      this.setData({ postsPage: 1, posts: [], postsHasMore: true });
-      this.loadPosts();
+      console.log("加载动态数据");
+      this.setData(
+        { postsPage: 1, posts: [], postsHasMore: true },
+        () => {
+          this.loadPosts();
+        }
+      );
     } else {
-      this.setData({ questionsPage: 1, questions: [], questionsHasMore: true });
-      this.loadQuestions();
+      console.log("加载问答数据");
+      this.setData(
+        { questionsPage: 1, questions: [], questionsHasMore: true },
+        () => {
+          this.loadQuestions();
+        }
+      );
     }
   },
 
   // Tab切换
   onTabChange(e) {
-    const index = e.currentTarget.dataset.index;
+    const index = parseInt(e.currentTarget.dataset.index, 10); // 转换为数字
+    console.log("Tab切换:", { 从: this.data.activeTab, 到: index, index类型: typeof index });
+    
     if (index === this.data.activeTab) return;
 
-    this.setData({ activeTab: index });
-    this.loadCurrentTabData();
+    // 使用 setData 的回调确保 activeTab 更新完成后再加载数据
+    this.setData({ activeTab: index }, () => {
+      console.log("activeTab 已更新为:", this.data.activeTab);
+      this.loadCurrentTabData();
+    });
   },
 
   // ========== 动态相关 ==========
 
   async loadPosts() {
     if (!this.data.postsHasMore || this.data.postsLoading) return;
-    this.setData({ postsLoading: true });
 
     try {
+      this.setData({ postsLoading: true });
+
       const res = await wx.cloud.callFunction({
         name: "postFunctions",
         data: {
@@ -70,21 +88,30 @@ Page({
         },
       });
 
-      if (res.result.code === 0) {
-        const newPosts = res.result.posts;
-        this.setData({
-          posts:
-            this.data.postsPage === 1
-              ? newPosts
-              : [...this.data.posts, ...newPosts],
+      if (res.result && res.result.code === 0) {
+        const newPosts = res.result.posts || [];
+        
+        // 合并数据，一次性设置所有字段
+        const updateData = {
+          postsLoading: false,
           postsHasMore: newPosts.length === 20,
-        });
+        };
+        
+        if (this.data.postsPage === 1) {
+          updateData.posts = newPosts;
+        } else {
+          updateData.posts = [...this.data.posts, ...newPosts];
+        }
+        
+        this.setData(updateData);
+      } else {
+        this.setData({ postsLoading: false });
+        wx.showToast({ title: "加载失败", icon: "none" });
       }
     } catch (err) {
       console.error("加载动态失败", err);
-      wx.showToast({ title: "加载失败", icon: "none" });
-    } finally {
       this.setData({ postsLoading: false });
+      wx.showToast({ title: "加载失败", icon: "none" });
     }
   },
 
@@ -111,10 +138,18 @@ Page({
   // ========== 问答相关 ==========
 
   async loadQuestions() {
-    if (!this.data.questionsHasMore || this.data.questionsLoading) return;
-    this.setData({ questionsLoading: true });
+    if (!this.data.questionsHasMore || this.data.questionsLoading) {
+      console.log("loadQuestions 被阻止:", { 
+        questionsHasMore: this.data.questionsHasMore,
+        questionsLoading: this.data.questionsLoading 
+      });
+      return;
+    }
 
     try {
+      this.setData({ questionsLoading: true });
+      console.log("开始加载问题...", { page: this.data.questionsPage, pageSize: 20 });
+      
       const res = await wx.cloud.callFunction({
         name: "qaFunctions",
         data: {
@@ -124,21 +159,43 @@ Page({
         },
       });
 
-      if (res.result.code === 0) {
-        const newQuestions = res.result.questions;
-        this.setData({
-          questions:
-            this.data.questionsPage === 1
-              ? newQuestions
-              : [...this.data.questions, ...newQuestions],
+      console.log("问题加载结果:", res);
+
+      if (res.result && res.result.code === 0) {
+        const newQuestions = res.result.questions || [];
+        console.log("获得问题列表，数量:", newQuestions.length);
+        console.log("newQuestions 类型:", typeof newQuestions, "是否数组:", Array.isArray(newQuestions));
+        
+        // 合并数据，一次性设置所有字段，避免竞态条件
+        const updateData = {
+          questionsLoading: false,
           questionsHasMore: newQuestions.length === 20,
+        };
+        
+        if (this.data.questionsPage === 1) {
+          updateData.questions = newQuestions;
+        } else {
+          updateData.questions = [...this.data.questions, ...newQuestions];
+        }
+        
+        console.log("准备 setData:", { 
+          questionsCount: updateData.questions.length,
+          questionsHasMore: updateData.questionsHasMore,
+          questionsLoading: updateData.questionsLoading 
         });
+        
+        this.setData(updateData, () => {
+          console.log("setData 完成");
+        });
+      } else {
+        console.error("云函数返回错误:", res.result);
+        this.setData({ questionsLoading: false });
+        wx.showToast({ title: res.result?.msg || "加载失败", icon: "none" });
       }
     } catch (err) {
-      console.error("加载问题失败", err);
-      wx.showToast({ title: "加载失败", icon: "none" });
-    } finally {
+      console.error("加载问题异常:", err);
       this.setData({ questionsLoading: false });
+      wx.showToast({ title: "加载失败: " + (err.message || "未知错误"), icon: "none" });
     }
   },
 
@@ -181,12 +238,38 @@ Page({
     }, 1000);
   },
 
-  // 格式化时间
-  formatTime(date) {
-    if (!date) return "";
+  // 格式化时间 - 处理 {$date: "..."} 和 ISO 字符串格式
+  formatTime(time) {
+    if (!time) return "";
+    
+    let date;
+    // 处理微信云数据库的 {$date: "..."} 格式
+    if (time && typeof time === 'object' && time.$date) {
+      date = new Date(time.$date);
+    } 
+    // 处理 ISO 字符串
+    else if (typeof time === 'string') {
+      date = new Date(time);
+    }
+    // 处理 Date 对象
+    else if (time instanceof Date) {
+      date = time;
+    }
+    // 处理其他数字时间戳
+    else if (typeof time === 'number') {
+      date = new Date(time);
+    } else {
+      return "";
+    }
+    
+    // 验证日期有效性
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+      console.warn("Invalid date:", time);
+      return "";
+    }
+
     const now = new Date();
-    const postDate = new Date(date);
-    const diff = now - postDate;
+    const diff = now - date;
     const minute = 60 * 1000;
     const hour = 60 * minute;
     const day = 24 * hour;
@@ -196,6 +279,6 @@ Page({
     if (diff < day) return Math.floor(diff / hour) + "小时前";
     if (diff < 7 * day) return Math.floor(diff / day) + "天前";
 
-    return `${postDate.getMonth() + 1}月${postDate.getDate()}日`;
+    return `${date.getMonth() + 1}月${date.getDate()}日`;
   },
 });

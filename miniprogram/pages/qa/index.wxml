@@ -1,17 +1,42 @@
 <view class="qa-page safe-bottom">
-  <view class="qa-header">
+  <view class="qa-header card">
     <text class="qa-title">社区问答</text>
     <text class="qa-subtitle">
-      {{role === 'elder' ? '用您的经验，帮助年轻人解答困惑' : '向长辈请教人生经验与智慧'}}
+      {{role === 'elder' ? '把人生经验写成回答，帮助更多年轻人' : '像知乎一样提问，快速获得长辈经验解答'}}
     </text>
+
+    <view class="qa-search-box">
+      <input
+        class="qa-search-input"
+        placeholder="搜索问题关键词"
+        value="{{searchInput}}"
+        bindinput="onSearchInput"
+        confirm-type="search"
+        bindconfirm="onSearchConfirm"
+      />
+      <text wx:if="{{keyword}}" class="qa-clear" bindtap="onClearSearch">清空</text>
+      <text wx:else class="qa-search-btn" bindtap="onSearchConfirm">搜索</text>
+    </view>
+
+    <view class="qa-tabs">
+      <view
+        wx:for="{{sortTabs}}"
+        wx:key="key"
+        class="qa-tab {{sortBy === item.key ? 'qa-tab-active' : ''}}"
+        bindtap="onSwitchSort"
+        data-sort="{{item.key}}"
+      >
+        <text>{{item.text}}</text>
+      </view>
+    </view>
   </view>
 
   <view wx:if="{{loading && questions.length === 0}}" class="loading-box">
     <text class="loading-text">加载中...</text>
   </view>
 
-  <view wx:elif="{{questions.length === 0}}" class="empty-state">
-    <text class="empty-state-text">暂无问题，快来提问吧</text>
+  <view wx:elif="{{questions.length === 0}}" class="empty-state card">
+    <text class="empty-state-text">还没有匹配的问题，换个关键词试试</text>
   </view>
 
   <block wx:else>
@@ -22,22 +47,40 @@
       bindtap="goDetail"
       data-id="{{item._id}}"
     >
-      <view class="qa-card-top">
-        <text class="qa-question-title">{{item.title}}</text>
-      </view>
-      <view wx:if="{{item.content}}" class="qa-question-desc">
-        <text>{{item.content}}</text>
-      </view>
-      <view class="qa-card-bottom">
-        <text class="qa-author">{{item.authorName}} 提问</text>
-        <view class="qa-answer-count">
-          <text class="qa-answer-icon">💬</text>
-          <text class="qa-answer-num">{{item.answerCount || 0}} 个回答</text>
+      <view class="qa-card-head">
+        <view class="qa-author-wrap">
+          <image wx:if="{{item.authorAvatar}}" class="qa-author-avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
+          <view wx:else class="qa-author-avatar qa-author-avatar-fallback">
+            <text>{{item.authorName ? item.authorName[0] : '匿'}}</text>
+          </view>
+          <view class="qa-author-meta">
+            <text class="qa-author-name">{{item.authorName}}</text>
+            <text class="qa-time">{{item.displayTime}}</text>
+          </view>
         </view>
+
+        <view class="qa-follow-btn {{item.isFollowing ? 'qa-followed' : ''}}" catchtap="onToggleFollow" data-id="{{item._id}}">
+          <text>{{item.isFollowing ? '已关注' : '+ 关注'}}</text>
+        </view>
+      </view>
+
+      <text class="qa-question-title">{{item.title}}</text>
+      <text wx:if="{{item.excerpt}}" class="qa-question-desc">{{item.excerpt}}</text>
+
+      <view class="qa-tags">
+        <text class="qa-tag qa-tag-hot">{{item.hotText}}</text>
+        <text wx:if="{{item.previewAnswerCount === 0}}" class="qa-tag qa-tag-wait">待回答</text>
+      </view>
+
+      <view class="qa-card-bottom">
+        <text>{{item.previewAnswerCount}} 回答</text>
+        <text>{{item.previewThanks}} 感谢</text>
+        <text>{{item.previewViewCount}} 浏览</text>
+        <text>{{item.previewFollowerCount}} 关注</text>
       </view>
     </view>
 
-    <view wx:if="{{loading}}" class="loading-box">
+    <view wx:if="{{loadingMore}}" class="loading-box">
       <text class="loading-text">加载更多...</text>
     </view>
     <view wx:elif="{{!hasMore}}" class="loading-box">
@@ -45,7 +88,6 @@
     </view>
   </block>
 
-  <!-- 年轻用户的提问按钮 -->
   <view wx:if="{{role === 'young'}}" class="fab" bindtap="goAsk">
     <text class="fab-text">提问</text>
   </view>

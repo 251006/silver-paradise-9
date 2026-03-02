@@ -15,9 +15,9 @@ Page({
       },
       {
         icon: "💬",
-        title: "社区问答",
-        desc: "用您的经验帮助年轻人",
-        url: "/pages/qa/index",
+        title: "社区",
+        desc: "动态分享与社区问答",
+        url: "/pages/community/index",
         color: "#4ECDC4",
       },
       {
@@ -38,17 +38,17 @@ Page({
       },
       {
         icon: "💬",
-        title: "社区问答",
-        desc: "向长辈请教经验智慧",
-        url: "/pages/qa/index",
+        title: "社区",
+        desc: "长辈动态与社区问答",
+        url: "/pages/community/index",
         color: "#4ECDC4",
       },
       {
-        icon: "❤️",
-        title: "长辈动态",
-        desc: "浏览长辈们的生活分享",
-        url: "/pages/feed/index",
-        color: "#FF6B6B",
+        icon: "👤",
+        title: "我的主页",
+        desc: "我的提问与收藏",
+        url: "/pages/profile/index",
+        color: "#FFD93D",
       },
     ],
   },
@@ -75,9 +75,8 @@ Page({
     const tabPages = [
       "/pages/index/index",
       "/pages/news/index",
-      "/pages/qa/index",
+      "/pages/community/index",
       "/pages/profile/index",
-      "/pages/feed/index",
     ];
     if (tabPages.includes(url)) {
       wx.switchTab({ url });

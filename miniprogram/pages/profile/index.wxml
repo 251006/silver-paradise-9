@@ -5,7 +5,7 @@
   <!-- 用户信息区 -->
   <view class="user-header">
     <!-- 头像 -->
-    <view class="avatar-container">
+    <view class="avatar-container" bindtap="goSettings">
       <image 
         class="avatar-image" 
         src="{{avatarUrl}}" 
@@ -37,93 +37,103 @@
   
   <!-- 统计数据 -->
   <view class="stats-section">
-    <view class="stat-item">
-      <text class="stat-number">{{followCount}}</text>
-      <text class="stat-label">关注</text>
+    <view class="stat-item" wx:if="{{role === 'elder'}}">
+      <text class="stat-number">{{postCount}}</text>
+      <text class="stat-label">我的动态</text>
     </view>
-    <view class="stat-item">
-      <text class="stat-number">{{fansCount}}</text>
-      <text class="stat-label">粉丝</text>
+    <view class="stat-item" wx:if="{{role === 'young'}}">
+      <text class="stat-number">{{questionCount}}</text>
+      <text class="stat-label">我的提问</text>
     </view>
     <view class="stat-item">
       <text class="stat-number">{{likeCount}}</text>
-      <text class="stat-label">获赞与收藏</text>
+      <text class="stat-label">获赞</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-number">0</text>
+      <text class="stat-label">收藏</text>
     </view>
   </view>
   
   <!-- 功能卡片 -->
   <view class="function-cards">
-    <view class="function-card" bindtap="goMemoir">
-      <view class="function-icon">📝</view>
-      <view class="function-info">
-        <text class="function-title">我的回忆录</text>
-        <text class="function-desc">记录珍贵回忆</text>
+    <!-- 老人用户功能 -->
+    <block wx:if="{{role === 'elder'}}">
+      <view class="function-card" bindtap="goPublish">
+        <view class="function-icon">✏️</view>
+        <view class="function-info">
+          <text class="function-title">发布动态</text>
+          <text class="function-desc">分享生活点滴</text>
+        </view>
       </view>
-    </view>
-    <view class="function-card" bindtap="goPublish">
-      <view class="function-icon">✏️</view>
-      <view class="function-info">
-        <text class="function-title">发布动态</text>
-        <text class="function-desc">分享生活点滴</text>
+      <view class="function-card" bindtap="goMemoir">
+        <view class="function-icon">📝</view>
+        <view class="function-info">
+          <text class="function-title">我的回忆录</text>
+          <text class="function-desc">记录珍贵回忆</text>
+        </view>
       </view>
-    </view>
-    <view class="function-card" bindtap="onLogout">
-      <view class="function-icon">🚪</view>
-      <view class="function-info">
-        <text class="function-title">退出登录</text>
-        <text class="function-desc">退出当前账号</text>
+    </block>
+    
+    <!-- 年轻用户功能 -->
+    <block wx:else>
+      <view class="function-card" bindtap="goAsk">
+        <view class="function-icon">❓</view>
+        <view class="function-info">
+          <text class="function-title">我要提问</text>
+          <text class="function-desc">获取长辈建议</text>
+        </view>
       </view>
+    </block>
+  </view>
+
+  <!-- 我的动态列表（仅老人可见） -->
+  <block wx:if="{{role === 'elder'}}">
+    <view class="section-header">
+      <text class="section-title">我的动态</text>
+      <text class="section-count">共 {{posts.length}} 条</text>
     </view>
-  </view>
 
-  
-  <!-- 内容标签页 -->
-  <view class="tab-bar">
-    <view 
-      class="tab-item {{currentTab === 'posts' ? 'tab-active' : ''}}" 
-      bindtap="switchTab" 
-      data-tab="posts"
-    >
-      <text class="tab-text">笔记</text>
+    <view wx:if="{{loading}}" class="loading-box">
+      <text class="loading-text">加载中...</text>
     </view>
-    <view 
-      class="tab-item {{currentTab === 'likes' ? 'tab-active' : ''}}" 
-      bindtap="switchTab" 
-      data-tab="likes"
-    >
-      <text class="tab-text">收藏</text>
+
+    <view wx:elif="{{posts.length === 0}}" class="empty-state">
+      <text class="empty-state-text">还没有发布动态，去发一条吧</text>
     </view>
-  </view>
-  
-  <!-- 我的动态列表 -->
-  <view class="section-header">
-    <text class="section-title">我的动态</text>
-    <text class="section-count">共 {{posts.length}} 条</text>
-  </view>
 
-  <view wx:if="{{loading}}" class="loading-box">
-    <text class="loading-text">加载中...</text>
-  </view>
-
-  <view wx:elif="{{posts.length === 0}}" class="empty-state">
-    <text class="empty-state-text">还没有发布动态，去发一条吧</text>
-  </view>
-
-  <block wx:else>
-    <view wx:for="{{posts}}" wx:key="_id" class="post-card card">
-      <text class="post-content">{{item.content}}</text>
-      <view class="post-footer">
-        <text class="post-time">{{item.createdAt}}</text>
-        <view class="post-actions">
-          <view class="action-item" bindtap="onLikePost" data-id="{{item._id}}">
-            <text class="action-icon">👍</text>
-            <text class="action-count">{{item.likes || 0}}</text>
-          </view>
-          <view class="action-item memoir-btn" bindtap="addToMemoir" data-id="{{item._id}}">
-            <text class="action-text">加入回忆录</text>
+    <block wx:else>
+      <view wx:for="{{posts}}" wx:key="_id" class="post-card card">
+        <text class="post-content">{{item.content}}</text>
+        <view class="post-footer">
+          <text class="post-time">{{formatTime(item.createdAt)}}</text>
+          <view class="post-actions">
+            <view class="action-item">
+              <text class="action-icon">👍</text>
+              <text class="action-count">{{item.likes || 0}}</text>
+            </view>
+            <view class="action-item memoir-btn" bindtap="addToMemoir" data-id="{{item._id}}">
+              <text class="action-text">加入回忆录</text>
+            </view>
           </view>
         </view>
       </view>
+    </block>
+  </block>
+
+  <!-- 年轻用户内容区 -->
+  <block wx:else>
+    <view class="section-header">
+      <text class="section-title">我的提问</text>
+      <text class="section-count">共 {{questionCount}} 个</text>
+    </view>
+
+    <view wx:if="{{loading}}" class="loading-box">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view wx:else class="empty-state">
+      <text class="empty-state-text">功能开发中，敬请期待</text>
     </view>
   </block>
 </view>

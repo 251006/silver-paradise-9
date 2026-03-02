@@ -1,4 +1,6 @@
 {
   "usingComponents": {},
-  "navigationBarTitleText": "社区问答"
+  "navigationBarTitleText": "社区问答",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
 }

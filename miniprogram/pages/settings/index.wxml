@@ -1,0 +1,62 @@
+<view class="settings-page safe-bottom">
+  <!-- 顶部背景 -->
+  <view class="settings-header">
+    <text class="header-title">个人信息</text>
+  </view>
+
+  <!-- 设置项列表 -->
+  <view class="settings-list">
+    <!-- 头像设置 -->
+    <view class="settings-item">
+      <text class="item-label">头像</text>
+      <view class="item-content">
+        <button class="avatar-button" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+          <image class="avatar-preview" src="{{avatarUrl}}" mode="aspectFill"></image>
+          <text class="avatar-hint">点击更换</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- 昵称设置 -->
+    <view class="settings-item">
+      <text class="item-label">昵称</text>
+      <view class="item-content">
+        <input 
+          class="nickname-input" 
+          type="nickname"
+          value="{{nickname}}" 
+          placeholder="请输入昵称"
+          maxlength="20"
+          bindinput="onNicknameInput"
+          bindblur="onNicknameBlur"
+        />
+      </view>
+    </view>
+
+    <!-- 用户ID -->
+    <view class="settings-item">
+      <text class="item-label">用户ID</text>
+      <view class="item-content">
+        <text class="user-id-text">{{openid.length > 15 ? openid.substring(0, 15) + '...' : openid}}</text>
+      </view>
+    </view>
+
+    <!-- 身份角色 -->
+    <view class="settings-item">
+      <text class="item-label">当前角色</text>
+      <view class="item-content">
+        <text class="role-text">{{role === 'elder' ? '长辈' : '年轻人'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 保存按钮 -->
+  <view class="save-section">
+    <button class="save-button" bindtap="onSave">保存信息</button>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="logout-section">
+    <button class="logout-button" bindtap="onLogout">退出登录</button>
+  </view>
+</view>

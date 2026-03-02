@@ -144,6 +144,33 @@ async function likePost(event, wxContext) {
   }
 }
 
+// 删除动态
+async function deletePost(event, wxContext) {
+  const { postId } = event;
+  const openid = wxContext.OPENID;
+
+  try {
+    // 验证用户是否为发布者
+    const postRes = await db.collection("posts").doc(postId).get();
+    const post = postRes.data;
+
+    if (!post) {
+      return { code: -1, msg: "动态不存在" };
+    }
+
+    if (post.authorId !== openid) {
+      return { code: -1, msg: "无权删除他人的动态" };
+    }
+
+    // 删除动态
+    await db.collection("posts").doc(postId).remove();
+    return { code: 0, msg: "删除成功" };
+  } catch (err) {
+    console.error("deletePost error:", err);
+    return { code: -1, msg: "删除失败" };
+  }
+}
+
 // 主入口路由
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
@@ -157,6 +184,8 @@ exports.main = async (event, context) => {
       return listAllPosts(event);
     case "likePost":
       return likePost(event, wxContext);
+    case "deletePost":
+      return deletePost(event, wxContext);
     default:
       return { code: -1, msg: "未知操作类型" };
   }

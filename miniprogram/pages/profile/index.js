@@ -120,6 +120,10 @@ Page({
 
   // ========== 页面跳转 ==========
 
+  goSettings() {
+    wx.navigateTo({ url: "/pages/settings/index" });
+  },
+
   goPublish() {
     wx.navigateTo({ url: "/pages/post/publish" });
   },

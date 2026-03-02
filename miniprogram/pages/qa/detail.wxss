@@ -11,6 +11,12 @@
   padding: 32rpx;
 }
 
+.question-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
 .question-title {
   display: block;
   font-size: 38rpx;
@@ -18,6 +24,31 @@
   color: #333333;
   line-height: 1.5;
   margin-bottom: 16rpx;
+}
+
+.question-user-meta {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin-bottom: 12rpx;
+}
+
+.question-follow {
+  min-width: 120rpx;
+  height: 52rpx;
+  border-radius: 26rpx;
+  background: #FFF0E6;
+  color: #E8713A;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 20rpx;
+}
+
+.question-followed {
+  background: #F3F3F3;
+  color: #999999;
 }
 
 .question-content {
@@ -28,11 +59,14 @@
   margin-bottom: 20rpx;
 }
 
-.question-meta {
+.question-stats {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 18rpx;
   padding-top: 16rpx;
   border-top: 1rpx solid #F0F0F0;
+  font-size: 24rpx;
+  color: #999999;
 }
 
 .meta-author {
@@ -50,12 +84,40 @@
   margin-bottom: 32rpx;
 }
 
+.answers-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18rpx;
+}
+
 .answers-title {
   display: block;
   font-size: 34rpx;
   font-weight: 600;
   color: #333333;
-  margin-bottom: 20rpx;
+}
+
+.answer-sort-tabs {
+  display: flex;
+  gap: 10rpx;
+}
+
+.answer-sort-tab {
+  min-width: 86rpx;
+  text-align: center;
+  height: 52rpx;
+  line-height: 52rpx;
+  border-radius: 10rpx;
+  background: #F5F5F5;
+  font-size: 24rpx;
+  color: #666666;
+}
+
+.answer-sort-tab-active {
+  background: #FFF0E6;
+  color: #E8713A;
+  font-weight: 600;
 }
 
 .answer-card {
@@ -124,6 +186,10 @@
   border-radius: 12rpx;
 }
 
+.thank-btn-active {
+  background: #FFEAD9;
+}
+
 .thank-btn:active {
   background: #FFE8D0;
 }
@@ -153,12 +219,20 @@
 
 .answer-input-header {
   margin-bottom: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .answer-input-title {
   font-size: 28rpx;
   font-weight: 600;
   color: #333333;
+}
+
+.answer-input-count {
+  font-size: 22rpx;
+  color: #AAAAAA;
 }
 
 .answer-textarea {

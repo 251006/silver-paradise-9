@@ -4,23 +4,45 @@
   </view>
 
   <block wx:elif="{{question}}">
-    <!-- 问题卡片 -->
     <view class="question-card card">
-      <text class="question-title">{{question.title}}</text>
-      <text wx:if="{{question.content}}" class="question-content">
-        {{question.content}}
-      </text>
-      <view class="question-meta">
-        <text class="meta-author">{{question.authorName}} 提问</text>
-        <text class="meta-time">{{question.createdAt}}</text>
+      <view class="question-head">
+        <view>
+          <text class="question-title">{{question.title}}</text>
+          <view class="question-user-meta">
+            <text class="meta-author">{{question.authorName}} 提问</text>
+            <text class="meta-time">{{question.displayTime}}</text>
+          </view>
+        </view>
+        <view class="question-follow {{question.isFollowing ? 'question-followed' : ''}}" bindtap="onToggleFollow">
+          <text>{{question.isFollowing ? '已关注' : '+ 关注'}}</text>
+        </view>
+      </view>
+
+      <text wx:if="{{question.content}}" class="question-content">{{question.content}}</text>
+
+      <view class="question-stats">
+        <text>{{question.displayAnswerCount}} 回答</text>
+        <text>{{question.displayThanks}} 感谢</text>
+        <text>{{question.displayViewCount}} 浏览</text>
+        <text>{{question.displayFollowerCount}} 关注</text>
       </view>
     </view>
 
-    <!-- 回答列表 -->
     <view class="answers-section">
-      <text class="answers-title">
-        回答 ({{answers.length}})
-      </text>
+      <view class="answers-head">
+        <text class="answers-title">回答 ({{answerCountText}})</text>
+        <view class="answer-sort-tabs">
+          <view
+            wx:for="{{answerSortTabs}}"
+            wx:key="key"
+            class="answer-sort-tab {{answerSort === item.key ? 'answer-sort-tab-active' : ''}}"
+            bindtap="onSwitchAnswerSort"
+            data-sort="{{item.key}}"
+          >
+            <text>{{item.text}}</text>
+          </view>
+        </view>
+      </view>
 
       <view wx:if="{{answers.length === 0}}" class="empty-state">
         <text class="empty-state-text">暂无回答，等待长辈分享经验</text>
@@ -33,27 +55,27 @@
           </view>
           <view class="answer-author-info">
             <text class="answer-author-name">{{item.authorName}}</text>
-            <text class="answer-time">{{item.createdAt}}</text>
+            <text class="answer-time">{{item.displayTime}}</text>
           </view>
         </view>
         <text class="answer-content">{{item.content}}</text>
         <view class="answer-footer">
           <view
-            class="thank-btn"
+            class="thank-btn {{item.liked ? 'thank-btn-active' : ''}}"
             bindtap="onLikeAnswer"
             data-id="{{item._id}}"
           >
             <text class="thank-icon">🙏</text>
-            <text class="thank-text">感谢 ({{item.likes || 0}})</text>
+            <text class="thank-text">{{item.liked ? '已感谢' : '感谢'}} ({{item.likes || 0}})</text>
           </view>
         </view>
       </view>
     </view>
 
-    <!-- 老人用户的回答输入区 -->
     <view wx:if="{{role === 'elder'}}" class="answer-input-section">
       <view class="answer-input-header">
         <text class="answer-input-title">分享您的经验</text>
+        <text class="answer-input-count">{{answerContent.length}}/1000</text>
       </view>
       <textarea
         class="answer-textarea"
@@ -68,7 +90,7 @@
         <button
           class="submit-answer-btn btn btn-primary"
           bindtap="submitAnswer"
-          disabled="{{submitting || !answerContent.trim()}}"
+          disabled="{{submitting || !canSubmitAnswer}}"
         >
           {{submitting ? '提交中...' : '提交回答'}}
         </button>

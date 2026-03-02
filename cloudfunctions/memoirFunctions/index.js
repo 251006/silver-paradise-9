@@ -10,7 +10,7 @@ const LLM_API_KEY = process.env.LLM_API_KEY || "";
 
 // 保存回忆录
 async function saveMemoir(event, wxContext) {
-  const { title, content, sourceRefs } = event;
+  const { title, content, sourceRefs, isAIGenerated } = event;
   const openid = wxContext.OPENID;
 
   if (!content || content.trim().length === 0) {
@@ -24,6 +24,7 @@ async function saveMemoir(event, wxContext) {
         title: (title || "").trim() || "无标题回忆",
         content: content.trim(),
         sourceRefs: sourceRefs || [],
+        isAIGenerated: !!isAIGenerated,
         createdAt: db.serverDate(),
       },
     });
@@ -31,13 +32,16 @@ async function saveMemoir(event, wxContext) {
     // 标记相关动态已加入回忆录
     if (sourceRefs && sourceRefs.length > 0) {
       for (const refId of sourceRefs) {
-        try {
-          await db
-            .collection("posts")
-            .doc(refId)
-            .update({ data: { inMemoir: true } });
-        } catch (e) {
-          // 可能是 answer 的 ID，忽略
+        // 只处理posts，因为answers在questions表中
+        if (refId.startsWith("post_")) {
+          try {
+            await db
+              .collection("posts")
+              .doc(refId)
+              .update({ data: { inMemoir: true } });
+          } catch (e) {
+            // 忽略错误，该post可能已被删除
+          }
         }
       }
     }
@@ -80,7 +84,7 @@ async function getMemoir(event) {
 
 // AI 辅助生成回忆录
 async function generateMemoir(event, wxContext) {
-  const { sourceIds } = event;
+  const { sourceIds, sourceType } = event; // sourceType: 'posts' 或 'answers'
   const openid = wxContext.OPENID;
 
   if (!sourceIds || sourceIds.length === 0) {
@@ -92,26 +96,38 @@ async function generateMemoir(event, wxContext) {
   }
 
   try {
-    // 收集素材内容
     const contents = [];
+    const validSourceIds = [];
 
-    // 从动态中获取
-    for (const id of sourceIds) {
-      try {
-        const postRes = await db.collection("posts").doc(id).get();
-        if (postRes.data) {
-          contents.push(postRes.data.content);
-        }
-      } catch (e) {
-        // 尝试从回答中获取
+    // 收集动态内容
+    if (sourceType !== "answers") {
+      for (const id of sourceIds) {
         try {
-          const ansRes = await db.collection("answers").doc(id).get();
-          if (ansRes.data) {
-            contents.push(ansRes.data.content);
+          const postRes = await db.collection("posts").doc(id).get();
+          if (postRes.data) {
+            contents.push(postRes.data.content);
+            validSourceIds.push(id);
           }
-        } catch (e2) {
-          // 跳过无效 ID
+        } catch (e) {
+          // sourceId可能无效，跳过
         }
+      }
+    }
+
+    // 收集回答内容（从questions的answers数组中）
+    if (sourceType !== "posts") {
+      const questionRes = await db.collection("questions").get();
+      if (questionRes.data && questionRes.data.length > 0) {
+        questionRes.data.forEach((question) => {
+          if (question.answers && question.answers.length > 0) {
+            question.answers.forEach((answer) => {
+              if (sourceIds.includes(answer._id)) {
+                contents.push(answer.content);
+                validSourceIds.push(answer._id);
+              }
+            });
+          }
+        });
       }
     }
 
@@ -177,7 +193,11 @@ ${materialList}
       return { code: -1, msg: "AI 生成失败，请重试" };
     }
 
-    return { code: 0, content: generatedContent };
+    return { 
+      code: 0, 
+      content: generatedContent,
+      sourceRefs: validSourceIds 
+    };
   } catch (err) {
     console.error("generateMemoir error:", err);
     return { code: -1, msg: "AI 生成失败，请重试" };

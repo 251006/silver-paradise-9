@@ -1,0 +1,165 @@
+/* pages/settings/index.wxss */
+.settings-page {
+  min-height: 100vh;
+  background: #F5F5F5;
+  padding-bottom: 40rpx;
+}
+
+/* 顶部区域 */
+.settings-header {
+  background: linear-gradient(180deg, #E8713A 0%, #F0864D 100%);
+  padding: 80rpx 32rpx 40rpx;
+  text-align: center;
+}
+
+.header-title {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+/* 设置列表 */
+.settings-list {
+  margin-top: 32rpx;
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  margin: 32rpx 32rpx 0;
+  overflow: hidden;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx;
+  border-bottom: 1rpx solid #F0F0F0;
+  min-height: 100rpx;
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+}
+
+.item-label {
+  font-size: 32rpx;
+  color: #333333;
+  font-weight: 500;
+  width: 160rpx;
+  flex-shrink: 0;
+}
+
+.item-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* 头像设置 */
+.avatar-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  line-height: 1;
+}
+
+.avatar-button::after {
+  border: none;
+}
+
+.avatar-preview {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  border: 2rpx solid #E8E8E8;
+}
+
+.avatar-hint {
+  font-size: 26rpx;
+  color: #E8713A;
+}
+
+/* 昵称输入 */
+.nickname-input {
+  text-align: right;
+  font-size: 30rpx;
+  color: #333333;
+  flex: 1;
+}
+
+.nickname-input::-webkit-input-placeholder {
+  color: #CCCCCC;
+}
+
+/* 用户ID和角色 */
+.user-id-text,
+.role-text {
+  font-size: 30rpx;
+  color: #999999;
+}
+
+.role-text {
+  color: #E8713A;
+  font-weight: 500;
+}
+
+/* 保存按钮 */
+.save-section {
+  padding: 48rpx 32rpx 24rpx;
+}
+
+.save-button {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #E8713A 0%, #F0864D 100%);
+  border-radius: 48rpx;
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(232, 113, 58, 0.3);
+}
+
+.save-button::after {
+  border: none;
+}
+
+.save-button:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+/* 退出登录 */
+.logout-section {
+  padding: 0 32rpx;
+}
+
+.logout-button {
+  width: 100%;
+  height: 96rpx;
+  background: #FFFFFF;
+  border-radius: 48rpx;
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #FF4444;
+  border: 2rpx solid #FF4444;
+}
+
+.logout-button::after {
+  border: none;
+}
+
+.logout-button:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+/* 底部安全区域 */
+.safe-bottom {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}

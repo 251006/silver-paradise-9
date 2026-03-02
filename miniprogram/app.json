@@ -8,6 +8,7 @@
     "pages/qa/detail",
     "pages/qa/ask",
     "pages/profile/index",
+    "pages/settings/index",
     "pages/post/publish",
     "pages/memoir/index",
     "pages/memoir/detail",
