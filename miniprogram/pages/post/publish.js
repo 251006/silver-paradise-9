@@ -2,18 +2,23 @@
 Page({
   data: {
     content: "",
+    canSubmit: false,
     submitting: false,
   },
 
   onContentInput(e) {
-    this.setData({ content: e.detail.value });
+    const content = e.detail.value || "";
+    this.setData({
+      content,
+      canSubmit: content.trim().length > 0,
+    });
   },
 
   async submitPost() {
-    const { content, submitting } = this.data;
+    const { content, submitting, canSubmit } = this.data;
     if (submitting) return;
 
-    if (!content.trim()) {
+    if (!canSubmit) {
       wx.showToast({ title: "请输入动态内容", icon: "none" });
       return;
     }

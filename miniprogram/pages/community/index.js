@@ -209,7 +209,18 @@ Page({
   },
 
   goPublishPost() {
-    wx.navigateTo({ url: "/pages/post/publish" });
+    if (this.data.role !== "elder") {
+      wx.showToast({ title: "仅长辈可发布动态", icon: "none" });
+      return;
+    }
+
+    wx.navigateTo({
+      url: "/pages/post/publish",
+      fail: (err) => {
+        console.error("跳转发布页失败", err);
+        wx.showToast({ title: "打开发布页失败", icon: "none" });
+      },
+    });
   },
 
   // ========== 触底加载更多 ==========

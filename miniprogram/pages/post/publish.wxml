@@ -22,9 +22,9 @@
 
   <!-- 发布按钮 -->
   <button
-    class="submit-btn btn btn-primary btn-block"
+    class="submit-btn btn btn-primary btn-block {{canSubmit && !submitting ? 'submit-btn-enabled' : ''}}"
     bindtap="submitPost"
-    disabled="{{submitting || !content.trim()}}"
+    disabled="{{submitting || !canSubmit}}"
   >
     {{submitting ? '发布中...' : '发布动态'}}
   </button>

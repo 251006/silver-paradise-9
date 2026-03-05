@@ -48,6 +48,12 @@
   margin-top: 20rpx;
 }
 
+.submit-btn-enabled {
+  background: linear-gradient(135deg, #E8713A, #F5A623) !important;
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+
 .submit-btn[disabled] {
   background: #CCCCCC !important;
   opacity: 0.6;

@@ -52,9 +52,9 @@
     </view>
 
     <!-- 发布动态按钮（仅老人可见） -->
-    <view class="float-btn" wx:if="{{role === 'elder'}}" bindtap="goPublishPost">
+    <button class="float-btn" wx:if="{{role === 'elder'}}" bindtap="goPublishPost">
       <text class="float-icon">+</text>
-    </view>
+    </button>
   </view>
 
   <!-- 问答列表 -->
@@ -84,8 +84,8 @@
     </view>
 
     <!-- 提问按钮（仅年轻人可见） -->
-    <view class="float-btn" wx:if="{{role === 'young'}}" bindtap="goAsk">
+    <button class="float-btn" wx:if="{{role === 'young'}}" bindtap="goAsk">
       <text class="float-icon">+</text>
-    </view>
+    </button>
   </view>
 </view>

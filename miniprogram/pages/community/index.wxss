@@ -219,7 +219,7 @@
 .float-btn {
   position: fixed;
   right: 30rpx;
-  bottom: 150rpx;
+  bottom: 210rpx;
   width: 110rpx;
   height: 110rpx;
   border-radius: 50%;
@@ -228,7 +228,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 99;
+  z-index: 1200;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  border: none;
+}
+
+.float-btn::after {
+  border: none;
 }
 
 .float-icon {
