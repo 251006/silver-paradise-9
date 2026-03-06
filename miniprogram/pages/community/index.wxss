@@ -75,6 +75,14 @@
   font-size: 36rpx;
   font-weight: 600;
   margin-right: 20rpx;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatar .avatar-image {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
 }
 
 .post-info {

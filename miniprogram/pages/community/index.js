@@ -1,6 +1,10 @@
 // pages/community/index.js - 社区页（动态+问答双tab）
 const app = getApp();
 
+const POSTS_CACHE_KEY = 'community_posts_cache';
+const QUESTIONS_CACHE_KEY = 'community_questions_cache';
+const COMMUNITY_CACHE_TTL = 5 * 60 * 1000; // 5分钟
+
 Page({
   data: {
     activeTab: 0, // 0=动态, 1=问答
@@ -19,6 +23,32 @@ Page({
     questionsLoading: false,
   },
 
+  // ========== 缓存辅助 ==========
+
+  _getCache(key) {
+    try {
+      const cached = wx.getStorageSync(key);
+      if (cached && Date.now() - cached.timestamp < COMMUNITY_CACHE_TTL) {
+        return cached;
+      }
+    } catch (e) {}
+    return null;
+  },
+
+  _setCache(key, list) {
+    try {
+      wx.setStorageSync(key, { list, timestamp: Date.now() });
+    } catch (e) {}
+  },
+
+  _clearCache(key) {
+    try {
+      wx.removeStorageSync(key);
+    } catch (e) {}
+  },
+
+  // ========== 生命周期 ==========
+
   onShow() {
     const userInfo = wx.getStorageSync("userInfo");
     if (userInfo) {
@@ -30,44 +60,66 @@ Page({
       this.getTabBar().setData({ selected: 2 });
     }
 
-    // 初始加载数据
-    this.loadCurrentTabData();
+    // 已有内存数据时跳过重新请求
+    if (this.data.activeTab === 0 && this.data.posts.length > 0) return;
+    if (this.data.activeTab === 1 && this.data.questions.length > 0) return;
+
+    // 优先读取缓存，没有再请求
+    this._loadTabWithCache(this.data.activeTab);
   },
 
-  // 加载当前Tab数据
-  loadCurrentTabData() {
-    console.log("loadCurrentTabData 当前 activeTab:", this.data.activeTab);
-    
-    if (this.data.activeTab === 0) {
-      console.log("加载动态数据");
+  // 读取指定 tab 的缓存，缓存失效时才发网络请求
+  _loadTabWithCache(tabIndex) {
+    const cacheKey = tabIndex === 0 ? POSTS_CACHE_KEY : QUESTIONS_CACHE_KEY;
+    const cached = this._getCache(cacheKey);
+    if (cached) {
+      if (tabIndex === 0) {
+        this.setData({
+          posts: cached.list,
+          postsPage: 1,
+          postsHasMore: cached.list.length >= 20,
+          postsLoading: false,
+        });
+      } else {
+        this.setData({
+          questions: cached.list,
+          questionsPage: 1,
+          questionsHasMore: cached.list.length >= 20,
+          questionsLoading: false,
+        });
+      }
+      return;
+    }
+    // 无有效缓存，发起请求
+    this.loadCurrentTabData(tabIndex);
+  },
+
+  // 强制刷新当前Tab（不走缓存）
+  loadCurrentTabData(tabIndex) {
+    const idx = tabIndex !== undefined ? tabIndex : this.data.activeTab;
+    if (idx === 0) {
       this.setData(
         { postsPage: 1, posts: [], postsHasMore: true },
-        () => {
-          this.loadPosts();
-        }
+        () => { this.loadPosts(); }
       );
     } else {
-      console.log("加载问答数据");
       this.setData(
         { questionsPage: 1, questions: [], questionsHasMore: true },
-        () => {
-          this.loadQuestions();
-        }
+        () => { this.loadQuestions(); }
       );
     }
   },
 
   // Tab切换
   onTabChange(e) {
-    const index = parseInt(e.currentTarget.dataset.index, 10); // 转换为数字
-    console.log("Tab切换:", { 从: this.data.activeTab, 到: index, index类型: typeof index });
-    
+    const index = parseInt(e.currentTarget.dataset.index, 10);
     if (index === this.data.activeTab) return;
 
-    // 使用 setData 的回调确保 activeTab 更新完成后再加载数据
     this.setData({ activeTab: index }, () => {
-      console.log("activeTab 已更新为:", this.data.activeTab);
-      this.loadCurrentTabData();
+      // 已有内存数据时直接切换，不重新请求
+      if (index === 0 && this.data.posts.length > 0) return;
+      if (index === 1 && this.data.questions.length > 0) return;
+      this._loadTabWithCache(index);
     });
   },
 
@@ -90,19 +142,21 @@ Page({
 
       if (res.result && res.result.code === 0) {
         const newPosts = res.result.posts || [];
-        
-        // 合并数据，一次性设置所有字段
+        const isFirstPage = this.data.postsPage === 1;
+
         const updateData = {
           postsLoading: false,
           postsHasMore: newPosts.length === 20,
         };
-        
-        if (this.data.postsPage === 1) {
+
+        if (isFirstPage) {
           updateData.posts = newPosts;
+          // 首页结果写入缓存
+          this._setCache(POSTS_CACHE_KEY, newPosts);
         } else {
           updateData.posts = [...this.data.posts, ...newPosts];
         }
-        
+
         this.setData(updateData);
       } else {
         this.setData({ postsLoading: false });
@@ -138,18 +192,11 @@ Page({
   // ========== 问答相关 ==========
 
   async loadQuestions() {
-    if (!this.data.questionsHasMore || this.data.questionsLoading) {
-      console.log("loadQuestions 被阻止:", { 
-        questionsHasMore: this.data.questionsHasMore,
-        questionsLoading: this.data.questionsLoading 
-      });
-      return;
-    }
+    if (!this.data.questionsHasMore || this.data.questionsLoading) return;
 
     try {
       this.setData({ questionsLoading: true });
-      console.log("开始加载问题...", { page: this.data.questionsPage, pageSize: 20 });
-      
+
       const res = await wx.cloud.callFunction({
         name: "qaFunctions",
         data: {
@@ -159,36 +206,25 @@ Page({
         },
       });
 
-      console.log("问题加载结果:", res);
-
       if (res.result && res.result.code === 0) {
         const newQuestions = res.result.questions || [];
-        console.log("获得问题列表，数量:", newQuestions.length);
-        console.log("newQuestions 类型:", typeof newQuestions, "是否数组:", Array.isArray(newQuestions));
-        
-        // 合并数据，一次性设置所有字段，避免竞态条件
+        const isFirstPage = this.data.questionsPage === 1;
+
         const updateData = {
           questionsLoading: false,
           questionsHasMore: newQuestions.length === 20,
         };
-        
-        if (this.data.questionsPage === 1) {
+
+        if (isFirstPage) {
           updateData.questions = newQuestions;
+          // 首页结果写入缓存
+          this._setCache(QUESTIONS_CACHE_KEY, newQuestions);
         } else {
           updateData.questions = [...this.data.questions, ...newQuestions];
         }
-        
-        console.log("准备 setData:", { 
-          questionsCount: updateData.questions.length,
-          questionsHasMore: updateData.questionsHasMore,
-          questionsLoading: updateData.questionsLoading 
-        });
-        
-        this.setData(updateData, () => {
-          console.log("setData 完成");
-        });
+
+        this.setData(updateData);
       } else {
-        console.error("云函数返回错误:", res.result);
         this.setData({ questionsLoading: false });
         wx.showToast({ title: res.result?.msg || "加载失败", icon: "none" });
       }
@@ -241,8 +277,10 @@ Page({
     }
   },
 
-  // 下拉刷新
+  // 下拉刷新：清缓存，强制重新请求
   onPullDownRefresh() {
+    this._clearCache(POSTS_CACHE_KEY);
+    this._clearCache(QUESTIONS_CACHE_KEY);
     this.loadCurrentTabData();
     setTimeout(() => {
       wx.stopPullDownRefresh();

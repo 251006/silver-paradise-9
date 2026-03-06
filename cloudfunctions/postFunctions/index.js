@@ -83,18 +83,38 @@ async function listAllPosts(event) {
     const userRes = await db
       .collection("users")
       .where({ _id: _.in(authorIds) })
-      .field({ nickname: true })
+      .field({ nickname: true, avatarUrl: true })
       .get();
 
     const nameMap = {};
+    const avatarMap = {};
     userRes.data.forEach((u) => {
       nameMap[u._id] = u.nickname;
+      avatarMap[u._id] = u.avatarUrl || "";
     });
 
-    const posts = res.data.map((p) => ({
-      ...p,
-      authorName: nameMap[p.authorId] || "匿名用户",
-    }));
+    // 将 cloud:// fileID 批量转为可直接使用的临时 HTTPS URL
+    const cloudFileIds = [...new Set(
+      Object.values(avatarMap).filter((url) => url && url.startsWith("cloud://"))
+    )];
+    const tempUrlMap = {};
+    if (cloudFileIds.length > 0) {
+      const tempRes = await cloud.getTempFileURL({ fileList: cloudFileIds });
+      tempRes.fileList.forEach((item) => {
+        if (item.tempFileURL) {
+          tempUrlMap[item.fileID] = item.tempFileURL;
+        }
+      });
+    }
+
+    const posts = res.data.map((p) => {
+      const rawAvatar = avatarMap[p.authorId] || "";
+      return {
+        ...p,
+        authorName: nameMap[p.authorId] || "匿名用户",
+        authorAvatarUrl: tempUrlMap[rawAvatar] || rawAvatar,
+      };
+    });
 
     return { code: 0, posts };
   } catch (err) {

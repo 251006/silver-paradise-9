@@ -22,7 +22,7 @@ Page({
       const res = await wx.cloud.callFunction({
         name: "newsFunctions",
         data: { 
-          type: "getNewsDetail", 
+          type: "getNews", 
           uniquekey: this.data.uniquekey 
         },
       });

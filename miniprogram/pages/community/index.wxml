@@ -23,7 +23,10 @@
     <view class="post-list">
       <view class="post-card" wx:for="{{posts}}" wx:key="_id">
         <view class="post-header">
-          <view class="avatar">{{item.authorName ? item.authorName[0] : '长'}}</view>
+          <view class="avatar">
+            <image wx:if="{{item.authorAvatarUrl}}" class="avatar-image" src="{{item.authorAvatarUrl}}" mode="aspectFill"></image>
+            <text wx:else>{{item.authorName ? item.authorName[0] : '长'}}</text>
+          </view>
           <view class="post-info">
             <text class="author-name">{{item.authorName || '匿名长辈'}}</text>
             <text class="post-time">{{formatTime(item.createdAt)}}</text>

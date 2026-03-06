@@ -16,7 +16,8 @@
     <view wx:for="{{posts}}" wx:key="_id" class="feed-card card">
       <view class="feed-card-header">
         <view class="feed-avatar">
-          <text class="feed-avatar-text">{{item.authorName[0] || '匿'}}</text>
+          <image wx:if="{{item.authorAvatarUrl}}" class="feed-avatar-image" src="{{item.authorAvatarUrl}}" mode="aspectFill"></image>
+          <text wx:else class="feed-avatar-text">{{item.authorName ? item.authorName[0] : '匿'}}</text>
         </view>
         <view class="feed-author-info">
           <text class="feed-author-name">{{item.authorName}}</text>

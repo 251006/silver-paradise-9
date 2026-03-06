@@ -42,6 +42,13 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.feed-avatar-image {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
 }
 
 .feed-avatar-text {
