@@ -1,4 +1,6 @@
 <!-- pages/community/index.wxml -->
+<wxs src="../../utils/timeUtils.wxs" module="timeUtils" />
+
 <view class="container">
   <!-- Tab切换 -->
   <view class="tab-bar">
@@ -29,10 +31,30 @@
           </view>
           <view class="post-info">
             <text class="author-name">{{item.authorName || '匿名长辈'}}</text>
-            <text class="post-time">{{formatTime(item.createdAt)}}</text>
+            <text class="post-time">{{timeUtils.formatTime(item.createdAt)}}</text>
+          </view>
+          <view wx:if="{{item.canDelete}}" class="post-menu" catchtap="showPostMenu" data-id="{{item._id}}" data-index="{{index}}">
+            <text>⋮</text>
           </view>
         </view>
         <view class="post-content">{{item.content}}</view>
+
+        <!-- 动态图片展示 -->
+        <view class="post-images" wx:if="{{item.images && item.images.length > 0}}">
+          <view class="image-grid">
+            <image
+              class="post-image"
+              wx:for="{{item.images}}"
+              wx:for-item="imgUrl"
+              wx:key="index"
+              src="{{imgUrl}}"
+              mode="aspectFill"
+              data-src="{{imgUrl}}"
+              bindtap="previewPostImage"
+            />
+          </view>
+        </view>
+
         <view class="post-footer">
           <view 
             class="like-btn {{item.liked ? 'liked' : ''}}" 
@@ -71,9 +93,26 @@
           </view>
         </view>
         <view class="question-content" wx:if="{{item.content}}">{{item.content}}</view>
+
+        <!-- 问题图片展示 -->
+        <view class="question-images" wx:if="{{item.images && item.images.length > 0}}">
+          <view class="image-grid">
+            <image
+              class="question-image"
+              wx:for="{{item.images}}"
+              wx:for-item="imgUrl"
+              wx:key="index"
+              src="{{imgUrl}}"
+              mode="aspectFill"
+              data-src="{{imgUrl}}"
+              bindtap="previewQuestionImage"
+            />
+          </view>
+        </view>
+
         <view class="question-footer">
           <text class="author-name">{{item.authorName}}</text>
-          <text class="question-time">{{formatTime(item.createdAt)}}</text>
+          <text class="question-time">{{timeUtils.formatTime(item.createdAt)}}</text>
         </view>
       </view>
 

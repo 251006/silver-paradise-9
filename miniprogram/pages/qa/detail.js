@@ -14,6 +14,7 @@ Page({
       { key: "latest", text: "最新" },
     ],
     answerCountText: "0",
+    canDeleteQuestion: false,  // 是否可以删除问题
   },
 
   onLoad(options) {
@@ -84,11 +85,16 @@ Page({
         const question = this.formatQuestion(res.result.question);
         const answers = this.formatAnswers((res.result.question && res.result.question.answers) || []);
 
+        // 检查是否为问题作者
+        const userInfo = wx.getStorageSync("userInfo") || {};
+        const canDeleteQuestion = question && question.authorId === userInfo.openid;
+
         this.setData({
           question,
           answers,
           role: currentRole,
           answerCountText: `${answers.length}`,
+          canDeleteQuestion,
         });
       } else {
         const errorMsg = (res.result && res.result.msg) || "加载失败";
@@ -229,6 +235,79 @@ Page({
       }
     } catch (err) {
       wx.showToast({ title: "操作失败：" + (err.message || "网络错误"), icon: "none" });
+    }
+  },
+
+  // 预览图片
+  previewImage(e) {
+    const src = e.currentTarget.dataset.src;
+    const type = e.currentTarget.dataset.type;
+    const allImages = [];
+
+    // 收集所有图片
+    if (this.data.question.images && this.data.question.images.length > 0) {
+      allImages.push(...this.data.question.images);
+    }
+
+    this.data.answers.forEach(answer => {
+      if (answer.images && answer.images.length > 0) {
+        allImages.push(...answer.images);
+      }
+    });
+
+    wx.previewImage({
+      current: src,
+      urls: allImages,
+    });
+  },
+
+  // 删除问题
+  async deleteQuestion() {
+    const questionId = this.data.questionId;
+    
+    const res = await wx.showModal({
+      title: '确认删除',
+      content: '删除问题后，所有回答也将被删除，且无法恢复，确定要删除吗？',
+      confirmText: '确认删除',
+      confirmColor: '#FF3B30',
+      cancelText: '取消'
+    });
+
+    if (!res.confirm) return;
+
+    wx.showLoading({ title: '删除中...', mask: true });
+    
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'qaFunctions',
+        data: {
+          type: 'deleteQuestion',
+          questionId: questionId
+        }
+      });
+
+      wx.hideLoading();
+
+      if (result.result.code === 0) {
+        wx.showToast({ 
+          title: '删除成功', 
+          icon: 'success',
+          duration: 1500
+        });
+        // 返回上一页
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 1500);
+      } else {
+        wx.showToast({ 
+          title: result.result.msg || '删除失败', 
+          icon: 'none' 
+        });
+      }
+    } catch (err) {
+      console.error('删除问题失败', err);
+      wx.hideLoading();
+      wx.showToast({ title: '删除失败，请重试', icon: 'none' });
     }
   },
 });

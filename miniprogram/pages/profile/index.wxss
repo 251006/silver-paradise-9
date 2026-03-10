@@ -306,6 +306,7 @@
   align-items: center;
   padding: 8rpx 16rpx;
   border-radius: 8rpx;
+  background: #F0F0F0;
 }
 
 .action-item:active {
@@ -327,9 +328,22 @@
   border-radius: 12rpx;
 }
 
+.memoir-btn .action-text {
+  color: #E8713A;
+}
+
+.delete-btn {
+  background: #FFF0F0;
+  border-radius: 12rpx;
+}
+
+.delete-btn .action-text {
+  color: #FF3B30;
+  font-weight: 500;
+}
+
 .action-text {
   font-size: 24rpx;
-  color: #E8713A;
   font-weight: 500;
 }
 

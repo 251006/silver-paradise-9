@@ -13,12 +13,33 @@
             <text class="meta-time">{{question.displayTime}}</text>
           </view>
         </view>
-        <view class="question-follow {{question.isFollowing ? 'question-followed' : ''}}" bindtap="onToggleFollow">
-          <text>{{question.isFollowing ? '已关注' : '+ 关注'}}</text>
+        <view class="question-actions">
+          <view class="question-follow {{question.isFollowing ? 'question-followed' : ''}}" bindtap="onToggleFollow">
+            <text>{{question.isFollowing ? '已关注' : '+ 关注'}}</text>
+          </view>
+          <view wx:if="{{canDeleteQuestion}}" class="question-delete" catchtap="deleteQuestion">
+            <text>删除</text>
+          </view>
         </view>
       </view>
 
       <text wx:if="{{question.content}}" class="question-content">{{question.content}}</text>
+
+      <!-- 问题图片展示 -->
+      <view class="question-images" wx:if="{{question.images && question.images.length > 0}}">
+        <view class="image-grid">
+          <image
+            class="detail-image"
+            wx:for="{{question.images}}"
+            wx:key="index"
+            src="{{item}}"
+            mode="aspectFill"
+            data-src="{{item}}"
+            bindtap="previewImage"
+            data-type="question"
+          />
+        </view>
+      </view>
 
       <view class="question-stats">
         <text>{{question.displayAnswerCount}} 回答</text>
@@ -59,6 +80,24 @@
           </view>
         </view>
         <text class="answer-content">{{item.content}}</text>
+
+        <!-- 回答图片展示 -->
+        <view class="answer-images" wx:if="{{item.images && item.images.length > 0}}">
+          <view class="image-grid">
+            <image
+              class="detail-image"
+              wx:for="{{item.images}}"
+              wx:key="index"
+              src="{{item}}"
+              mode="aspectFill"
+              data-src="{{item}}"
+              data-answer-index="{{index}}"
+              bindtap="previewImage"
+              data-type="answer"
+            />
+          </view>
+        </view>
+
         <view class="answer-footer">
           <view
             class="thank-btn {{item.liked ? 'thank-btn-active' : ''}}"

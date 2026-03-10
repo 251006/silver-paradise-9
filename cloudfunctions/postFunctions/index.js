@@ -6,7 +6,7 @@ const _ = db.command;
 
 // 发布动态
 async function insertPost(event, wxContext) {
-  const { content } = event;
+  const { content, images = [] } = event;
   const openid = wxContext.OPENID;
 
   if (!content || content.trim().length === 0) {
@@ -18,6 +18,7 @@ async function insertPost(event, wxContext) {
       data: {
         authorId: openid,
         content: content.trim(),
+        images: Array.isArray(images) ? images : [],
         likes: 0,
         likedBy: [],
         inMemoir: false,
@@ -45,7 +46,30 @@ async function listMyPosts(event, wxContext) {
       .limit(pageSize)
       .get();
 
-    return { code: 0, posts: res.data };
+    // 转换图片URL
+    const posts = res.data;
+    // 收集原始图片路径并替换为新路径
+    const originalPaths = [...new Set(
+      posts.flatMap(p => (p.images || []).filter(img => img.startsWith("cloud://")))
+    )];
+    const newPaths = originalPaths.map(fileId => fileId.replace('/posts/', '/posts/photos/'));
+
+    if (newPaths.length > 0) {
+      const tempRes = await cloud.getTempFileURL({ fileList: newPaths });
+      const tempUrlMap = {};
+      tempRes.fileList.forEach((item, index) => {
+        if (item.tempFileURL) {
+          // 使用原始路径作为key，新路径的临时URL作为value
+          tempUrlMap[originalPaths[index]] = item.tempFileURL;
+        }
+      });
+
+      posts.forEach(p => {
+        p.images = (p.images || []).map(img => tempUrlMap[img] || img);
+      });
+    }
+
+    return { code: 0, posts };
   } catch (err) {
     return { code: -1, msg: "查询失败" };
   }
@@ -93,24 +117,31 @@ async function listAllPosts(event) {
       avatarMap[u._id] = u.avatarUrl || "";
     });
 
-    // 将 cloud:// fileID 批量转为可直接使用的临时 HTTPS URL
-    const cloudFileIds = [...new Set(
-      Object.values(avatarMap).filter((url) => url && url.startsWith("cloud://"))
-    )];
+    // 收集所有需要转换的云文件ID（头像+图片）
+    // 将旧路径 posts/ 替换为新路径 posts/photos/
+    const originalAvatars = Object.values(avatarMap).filter((url) => url && url.startsWith("cloud://"));
+    const originalImages = res.data.flatMap(p => (p.images || []).filter(img => img.startsWith("cloud://")));
+    const allOriginalPaths = [...new Set([...originalAvatars, ...originalImages])];
+    const allNewPaths = allOriginalPaths.map(fileId => fileId.replace('/posts/', '/posts/photos/'));
+    
     const tempUrlMap = {};
-    if (cloudFileIds.length > 0) {
-      const tempRes = await cloud.getTempFileURL({ fileList: cloudFileIds });
-      tempRes.fileList.forEach((item) => {
+    if (allNewPaths.length > 0) {
+      const tempRes = await cloud.getTempFileURL({ fileList: allNewPaths });
+      tempRes.fileList.forEach((item, index) => {
         if (item.tempFileURL) {
-          tempUrlMap[item.fileID] = item.tempFileURL;
+          // 使用原始路径作为key
+          tempUrlMap[allOriginalPaths[index]] = item.tempFileURL;
         }
       });
     }
 
     const posts = res.data.map((p) => {
       const rawAvatar = avatarMap[p.authorId] || "";
+      // 转换图片URL
+      const processedImages = (p.images || []).map(img => tempUrlMap[img] || img);
       return {
         ...p,
+        images: processedImages,
         authorName: nameMap[p.authorId] || "匿名用户",
         authorAvatarUrl: tempUrlMap[rawAvatar] || rawAvatar,
       };

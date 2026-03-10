@@ -1,3 +1,5 @@
+<wxs src="../../utils/timeUtils.wxs" module="timeUtils" />
+
 <view class="profile-page safe-bottom">
   <!-- 顶部背景 -->
   <view class="profile-bg"></view>
@@ -106,7 +108,7 @@
       <view wx:for="{{posts}}" wx:key="_id" class="post-card card">
         <text class="post-content">{{item.content}}</text>
         <view class="post-footer">
-          <text class="post-time">{{formatTime(item.createdAt)}}</text>
+          <text class="post-time">{{timeUtils.formatTime(item.createdAt)}}</text>
           <view class="post-actions">
             <view class="action-item">
               <text class="action-icon">👍</text>
@@ -114,6 +116,9 @@
             </view>
             <view class="action-item memoir-btn" bindtap="addToMemoir" data-id="{{item._id}}">
               <text class="action-text">加入回忆录</text>
+            </view>
+            <view class="action-item delete-btn" bindtap="deletePost" data-id="{{item._id}}">
+              <text class="action-text">删除</text>
             </view>
           </view>
         </view>

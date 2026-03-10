@@ -1,0 +1,53 @@
+/**
+ * 时间格式化工具模块
+ * 用于在 WXML 中格式化时间显示
+ */
+
+/**
+ * 格式化时间为相对时间或绝对日期
+ * @param {Object|String|Number} time - 时间对象、ISO字符串或时间戳
+ * @returns {String} 格式化后的时间字符串
+ */
+function formatTime(time) {
+  if (!time) return "";
+  
+  var date;
+  // 处理微信云数据库的 {$date: "..."} 格式
+  if (time && typeof time === 'object' && time['$date']) {
+    date = getDate(time['$date']);
+  } 
+  // 处理 ISO 字符串
+  else if (typeof time === 'string') {
+    date = getDate(time);
+  }
+  // 处理数字时间戳
+  else if (typeof time === 'number') {
+    date = getDate(time);
+  } else {
+    return "";
+  }
+  
+  // 验证日期有效性
+  if (!date || date.toString() === 'Invalid Date') {
+    return "";
+  }
+
+  var now = getDate();
+  var diff = now.getTime() - date.getTime();
+  var minute = 60 * 1000;
+  var hour = 60 * minute;
+  var day = 24 * hour;
+
+  if (diff < minute) return "刚刚";
+  if (diff < hour) return Math.floor(diff / minute) + "分钟前";
+  if (diff < day) return Math.floor(diff / hour) + "小时前";
+  if (diff < 7 * day) return Math.floor(diff / day) + "天前";
+
+  var month = date.getMonth() + 1;
+  var dayOfMonth = date.getDate();
+  return month + "月" + dayOfMonth + "日";
+}
+
+module.exports = {
+  formatTime: formatTime
+};

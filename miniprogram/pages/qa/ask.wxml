@@ -38,6 +38,35 @@
     />
   </view>
 
+  <!-- 图片上传区 -->
+  <view class="form-group card image-upload-section">
+    <view class="form-label-row">
+      <text class="form-label">添加图片（选填）</text>
+      <text class="count-text">{{images.length}}/{{maxImages}}</text>
+    </view>
+    <view class="image-grid">
+      <!-- 已选图片 -->
+      <view
+        class="image-item"
+        wx:for="{{images}}"
+        wx:key="index"
+        data-index="{{index}}"
+        bindtap="previewImage"
+      >
+        <image class="uploaded-image" src="{{item}}" mode="aspectFill" />
+        <view class="delete-btn" data-index="{{index}}" bindtap="deleteImage">
+          <text class="delete-icon">×</text>
+        </view>
+      </view>
+
+      <!-- 添加图片按钮 -->
+      <view class="add-image-btn" bindtap="chooseImage" wx:if="{{images.length < maxImages}}">
+        <text class="add-icon">+</text>
+        <text class="add-text">添加图片</text>
+      </view>
+    </view>
+  </view>
+
   <button
     class="submit-btn btn btn-primary btn-block"
     bindtap="submitQuestion"

@@ -121,6 +121,7 @@ async function insertQuestion(event, wxContext) {
   const openid = wxContext.OPENID;
   const title = sanitizeText(event.title, 60);
   const content = sanitizeText(event.content, 2000);
+  const images = Array.isArray(event.images) ? event.images : [];
 
   if (!title) return { code: -1, msg: "问题标题不能为空" };
 
@@ -133,6 +134,7 @@ async function insertQuestion(event, wxContext) {
         authorId: openid,
         title,
         content,
+        images,
         answers: [],
         answerCount: 0,
         viewCount: 0,
@@ -183,7 +185,38 @@ async function listQuestions(event, wxContext) {
     }
 
     const authorMap = await getUserMap(questions.map((item) => item.authorId));
-    let enriched = questions.map((item) => enrichQuestion(item, authorMap, openid));
+
+    // 收集所有需要转换的云文件ID（头像+问题图片）
+    const cloudFileIds = [...new Set(
+      Object.values(authorMap)
+        .map(u => u.avatarUrl)
+        .filter(url => url && url.startsWith("cloud://"))
+        .concat(...questions.map(q => (q.images || []).filter(img => img.startsWith("cloud://"))))
+    )];
+
+    // 批量转换临时URL
+    const tempUrlMap = {};
+    if (cloudFileIds.length > 0) {
+      const tempRes = await cloud.getTempFileURL({ fileList: cloudFileIds });
+      tempRes.fileList.forEach((item) => {
+        if (item.tempFileURL) {
+          tempUrlMap[item.fileID] = item.tempFileURL;
+        }
+      });
+    }
+
+    // 转换用户头像URL
+    Object.values(authorMap).forEach(user => {
+      if (user.avatarUrl && tempUrlMap[user.avatarUrl]) {
+        user.avatarUrl = tempUrlMap[user.avatarUrl];
+      }
+    });
+
+    let enriched = questions.map((item) => {
+      // 转换问题图片URL
+      item.images = (item.images || []).map(img => tempUrlMap[img] || img);
+      return enrichQuestion(item, authorMap, openid);
+    });
 
     if (sortBy === "hot") {
       enriched = enriched.sort((a, b) => b.heatScore - a.heatScore);
@@ -221,7 +254,41 @@ async function getQuestion(event, wxContext) {
     const answerAuthorIds = (question.answers || []).map((item) => item.authorId);
     const userMap = await getUserMap([question.authorId, ...answerAuthorIds]);
 
-    const answers = (question.answers || []).map((item) => enrichAnswer(item, userMap, openid));
+    // 收集所有需要转换的云文件ID（头像+问题图片+回答图片）
+    const cloudFileIds = [...new Set(
+      Object.values(userMap)
+        .map(u => u.avatarUrl)
+        .filter(url => url && url.startsWith("cloud://"))
+        .concat((question.images || []).filter(img => img.startsWith("cloud://")))
+        .concat(...(question.answers || []).map(a => (a.images || []).filter(img => img.startsWith("cloud://"))))
+    )];
+
+    // 批量转换临时URL
+    const tempUrlMap = {};
+    if (cloudFileIds.length > 0) {
+      const tempRes = await cloud.getTempFileURL({ fileList: cloudFileIds });
+      tempRes.fileList.forEach((item) => {
+        if (item.tempFileURL) {
+          tempUrlMap[item.fileID] = item.tempFileURL;
+        }
+      });
+    }
+
+    // 转换用户头像URL
+    Object.values(userMap).forEach(user => {
+      if (user.avatarUrl && tempUrlMap[user.avatarUrl]) {
+        user.avatarUrl = tempUrlMap[user.avatarUrl];
+      }
+    });
+
+    // 转换问题图片URL
+    question.images = (question.images || []).map(img => tempUrlMap[img] || img);
+
+    const answers = (question.answers || []).map((item) => {
+      // 转换回答图片URL
+      item.images = (item.images || []).map(img => tempUrlMap[img] || img);
+      return enrichAnswer(item, userMap, openid);
+    });
     const sortedAnswers = answers.sort((a, b) => {
       if (answerSort === "latest") {
         return getDateMillis(b.createdAt) - getDateMillis(a.createdAt);
@@ -264,6 +331,7 @@ async function insertAnswer(event, wxContext) {
   const openid = wxContext.OPENID;
   const questionId = sanitizeText(event.questionId, 64);
   const content = sanitizeText(event.content, 3000);
+  const images = Array.isArray(event.images) ? event.images : [];
 
   if (!questionId || !content) return { code: -1, msg: "回答内容不能为空" };
 
@@ -285,6 +353,7 @@ async function insertAnswer(event, wxContext) {
       _id: answerId,
       authorId: openid,
       content,
+      images,
       likes: 0,
       likedBy: [],
       createdAt: db.serverDate(),
@@ -427,6 +496,36 @@ async function listMyAnswers(event, wxContext) {
   }
 }
 
+// 删除问题
+async function deleteQuestion(event, wxContext) {
+  const openid = wxContext.OPENID;
+  const questionId = sanitizeText(event.questionId, 64);
+
+  if (!questionId) return { code: -1, msg: "参数错误" };
+
+  try {
+    // 获取问题信息
+    const qRes = await db.collection("questions").doc(questionId).get();
+    const question = qRes.data;
+
+    if (!question) {
+      return { code: -1, msg: "问题不存在" };
+    }
+
+    // 验证用户是否为提问者
+    if (question.authorId !== openid) {
+      return { code: -1, msg: "无权删除他人的问题" };
+    }
+
+    // 删除问题
+    await db.collection("questions").doc(questionId).remove();
+    return { code: 0, msg: "删除成功" };
+  } catch (err) {
+    console.error("deleteQuestion error:", err);
+    return { code: -1, msg: "删除失败，请稍后重试" };
+  }
+}
+
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
 
@@ -445,6 +544,8 @@ exports.main = async (event, context) => {
       return followQuestion(event, wxContext);
     case "listMyAnswers":
       return listMyAnswers(event, wxContext);
+    case "deleteQuestion":
+      return deleteQuestion(event, wxContext);
     default:
       return { code: -1, msg: "未知操作类型" };
   }

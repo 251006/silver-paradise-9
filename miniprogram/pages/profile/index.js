@@ -98,6 +98,50 @@ Page({
     wx.showToast({ title: "已标记为回忆录素材", icon: "success" });
   },
 
+  // 删除动态
+  async deletePost(e) {
+    const postId = e.currentTarget.dataset.id;
+    
+    const res = await wx.showModal({
+      title: '确认删除',
+      content: '删除后无法恢复，确定要删除这条动态吗？',
+      confirmText: '确认删除',
+      confirmColor: '#FF3B30',
+      cancelText: '取消'
+    });
+
+    if (!res.confirm) return;
+
+    wx.showLoading({ title: '删除中...', mask: true });
+    
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'postFunctions',
+        data: {
+          type: 'deletePost',
+          postId: postId
+        }
+      });
+
+      wx.hideLoading();
+
+      if (result.result.code === 0) {
+        wx.showToast({ title: '删除成功', icon: 'success' });
+        // 重新加载动态列表
+        this.loadMyPosts();
+      } else {
+        wx.showToast({ 
+          title: result.result.msg || '删除失败', 
+          icon: 'none' 
+        });
+      }
+    } catch (err) {
+      console.error('删除动态失败', err);
+      wx.hideLoading();
+      wx.showToast({ title: '删除失败，请重试', icon: 'none' });
+    }
+  },
+
   // ========== 年轻用户数据加载 ==========
   
   async loadMyQuestions() {

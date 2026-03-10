@@ -51,11 +51,46 @@ async function checkText(event) {
   }
 }
 
+// 检查图片内容安全
+async function checkImage(event) {
+  const { mediaUrl } = event;
+
+  if (!mediaUrl) {
+    return { code: 0, safe: true };
+  }
+
+  try {
+    // 调用微信官方图片内容安全检测
+    const res = await cloud.openapi.security.imgSecCheck({
+      media: {
+        contentType: 'image/png',
+        value: Buffer.from(await (await fetch(mediaUrl)).arrayBuffer())
+      }
+    });
+
+    if (res.errCode === 0) {
+      return { code: 0, safe: true };
+    } else {
+      return {
+        code: 0,
+        safe: false,
+        msg: "图片包含不当内容，请重新选择",
+      };
+    }
+  } catch (err) {
+    console.error("imgSecCheck error:", err);
+    // 如果接口出错，降级为允许通过
+    return { code: 0, safe: true };
+  }
+}
+
 // 主入口路由
 exports.main = async (event, context) => {
   switch (event.type) {
     case "checkText":
       return checkText(event);
+    case "checkImage":
+      return checkImage(event);
     default:
       return { code: -1, msg: "未知操作类型" };
   }

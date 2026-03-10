@@ -9,6 +9,7 @@ Page({
   data: {
     activeTab: 0, // 0=动态, 1=问答
     role: "",
+    currentUserOpenid: "", // 当前用户ID
 
     // 动态相关
     posts: [],
@@ -52,7 +53,10 @@ Page({
   onShow() {
     const userInfo = wx.getStorageSync("userInfo");
     if (userInfo) {
-      this.setData({ role: userInfo.role });
+      this.setData({ 
+        role: userInfo.role,
+        currentUserOpenid: userInfo.openid || ""
+      });
     }
 
     // 设置底部Tab选中状态
@@ -144,17 +148,23 @@ Page({
         const newPosts = res.result.posts || [];
         const isFirstPage = this.data.postsPage === 1;
 
+        // 标记可删除的动态
+        const processedPosts = newPosts.map(post => ({
+          ...post,
+          canDelete: post.authorId === this.data.currentUserOpenid
+        }));
+
         const updateData = {
           postsLoading: false,
           postsHasMore: newPosts.length === 20,
         };
 
         if (isFirstPage) {
-          updateData.posts = newPosts;
+          updateData.posts = processedPosts;
           // 首页结果写入缓存
-          this._setCache(POSTS_CACHE_KEY, newPosts);
+          this._setCache(POSTS_CACHE_KEY, processedPosts);
         } else {
-          updateData.posts = [...this.data.posts, ...newPosts];
+          updateData.posts = [...this.data.posts, ...processedPosts];
         }
 
         this.setData(updateData);
@@ -287,6 +297,40 @@ Page({
     }, 1000);
   },
 
+  // 预览动态图片
+  previewPostImage(e) {
+    const src = e.currentTarget.dataset.src;
+    const allImages = [];
+    // 收集所有动态图片
+    this.data.posts.forEach(post => {
+      if (post.images && post.images.length > 0) {
+        allImages.push(...post.images);
+      }
+    });
+
+    wx.previewImage({
+      current: src,
+      urls: allImages,
+    });
+  },
+
+  // 预览问题图片
+  previewQuestionImage(e) {
+    const src = e.currentTarget.dataset.src;
+    const allImages = [];
+    // 收集所有问题图片
+    this.data.questions.forEach(question => {
+      if (question.images && question.images.length > 0) {
+        allImages.push(...question.images);
+      }
+    });
+
+    wx.previewImage({
+      current: src,
+      urls: allImages,
+    });
+  },
+
   // 格式化时间 - 处理 {$date: "..."} 和 ISO 字符串格式
   formatTime(time) {
     if (!time) return "";
@@ -329,5 +373,65 @@ Page({
     if (diff < 7 * day) return Math.floor(diff / day) + "天前";
 
     return `${date.getMonth() + 1}月${date.getDate()}日`;
+  },
+
+  // 显示动态菜单
+  showPostMenu(e) {
+    const { id, index } = e.currentTarget.dataset;
+    wx.showActionSheet({
+      itemList: ['删除动态'],
+      itemColor: '#FF3B30',
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          this.deletePost(id, index);
+        }
+      }
+    });
+  },
+
+  // 删除动态
+  async deletePost(postId, index) {
+    const res = await wx.showModal({
+      title: '确认删除',
+      content: '删除后无法恢复，确定要删除这条动态吗？',
+      confirmText: '确认删除',
+      confirmColor: '#FF3B30',
+      cancelText: '取消'
+    });
+
+    if (!res.confirm) return;
+
+    wx.showLoading({ title: '删除中...', mask: true });
+    
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'postFunctions',
+        data: {
+          type: 'deletePost',
+          postId: postId
+        }
+      });
+
+      wx.hideLoading();
+
+      if (result.result.code === 0) {
+        wx.showToast({ title: '删除成功', icon: 'success' });
+        // 从列表中移除
+        const posts = [...this.data.posts];
+        posts.splice(index, 1);
+        this.setData({ posts });
+        // 清空缓存
+        this._clearCache(POSTS_CACHE_KEY);
+      } else {
+        wx.showToast({ 
+          title: result.result.msg || '删除失败', 
+          icon: 'none' 
+        });
+      }
+    } catch (err) {
+      console.error('删除动态失败', err);
+      wx.hideLoading();
+      wx.showToast({ title: '删除失败，请重试', icon: 'none' });
+    }
   },
 });
