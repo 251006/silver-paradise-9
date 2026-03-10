@@ -5,11 +5,13 @@
     "pages/news/index",
     "pages/news/detail",
     "pages/community/index",
+    "pages/messages/index",
     "pages/qa/detail",
     "pages/qa/ask",
     "pages/profile/index",
     "pages/settings/index",
     "pages/post/publish",
+    "pages/post/detail",
     "pages/memoir/index",
     "pages/memoir/detail",
     "pages/memoir/create"

@@ -3,6 +3,11 @@
 <view class="profile-page safe-bottom">
   <!-- 顶部背景 -->
   <view class="profile-bg"></view>
+
+  <view class="header-message-btn" bindtap="goMessages">
+    <text class="header-message-icon">🔔</text>
+    <text class="header-message-text">消息</text>
+  </view>
   
   <!-- 用户信息区 -->
   <view class="user-header">

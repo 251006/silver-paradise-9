@@ -57,5 +57,19 @@ Component({
       const url = data.path;
       wx.switchTab({ url });
     },
+
+    onCenterAction() {
+      if (this.data.role === "elder") {
+        wx.navigateTo({ url: "/pages/post/publish" });
+        return;
+      }
+
+      if (this.data.role === "young") {
+        wx.navigateTo({ url: "/pages/qa/ask" });
+        return;
+      }
+
+      wx.showToast({ title: "请先完成身份选择", icon: "none" });
+    },
   },
 });

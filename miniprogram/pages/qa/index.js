@@ -1,6 +1,8 @@
 Page({
   data: {
     questions: [],
+    questionsLeft: [],
+    questionsRight: [],
     role: "",
     loading: true,
     loadingMore: false,
@@ -51,12 +53,35 @@ Page({
       ...item,
       displayTime: this.formatTime(item.createdAt),
       excerpt: item.content || "",
+      coverImage: Array.isArray(item.images) && item.images.length > 0 ? item.images[0] : "",
       previewAnswerCount: Number(item.answerCount || 0),
       previewViewCount: Number(item.viewCount || 0),
       previewFollowerCount: Number(item.followerCount || 0),
       previewThanks: Number(item.totalThanks || 0),
       hotText: `热度 ${Math.round(Number(item.heatScore || 0))}`,
     }));
+  },
+
+  splitMasonry(list = []) {
+    const left = [];
+    const right = [];
+    list.forEach((item, idx) => {
+      if (idx % 2 === 0) {
+        left.push(item);
+      } else {
+        right.push(item);
+      }
+    });
+    return { left, right };
+  },
+
+  syncMasonryQuestions(list = []) {
+    const next = this.splitMasonry(list);
+    this.setData({
+      questions: list,
+      questionsLeft: next.left,
+      questionsRight: next.right,
+    });
   },
 
   async loadQuestions({ reset = false } = {}) {
@@ -81,8 +106,12 @@ Page({
 
       if (res.result && res.result.code === 0) {
         const incoming = this.formatQuestions(res.result.questions || []);
+        const merged = reset ? incoming : [...this.data.questions, ...incoming];
+        const layout = this.splitMasonry(merged);
         this.setData({
-          questions: reset ? incoming : [...this.data.questions, ...incoming],
+          questions: merged,
+          questionsLeft: layout.left,
+          questionsRight: layout.right,
           hasMore: !!res.result.hasMore,
           page: nextPage + 1,
         });
@@ -108,6 +137,8 @@ Page({
       page: 1,
       hasMore: true,
       questions: [],
+      questionsLeft: [],
+      questionsRight: [],
       loading: false,
       loadingMore: false,
     });

@@ -1,0 +1,98 @@
+.messages-page {
+  min-height: 100vh;
+  padding: 28rpx 24rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+}
+
+.messages-header {
+  margin-bottom: 18rpx;
+}
+
+.messages-title {
+  display: block;
+  font-size: 38rpx;
+  font-weight: 600;
+  color: #222222;
+}
+
+.messages-subtitle {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #8b8b8b;
+}
+
+.message-card {
+  background: #ffffff;
+  border-radius: 18rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.message-head {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.sender-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14rpx;
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+.official-avatar {
+  background: linear-gradient(135deg, #e8713a, #f39f45);
+}
+
+.sender-main {
+  flex: 1;
+}
+
+.sender-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sender-name {
+  font-size: 28rpx;
+  color: #2d2d2d;
+  font-weight: 600;
+}
+
+.message-time {
+  font-size: 22rpx;
+  color: #b0b0b0;
+}
+
+.message-title {
+  margin-top: 4rpx;
+  font-size: 26rpx;
+  color: #595959;
+}
+
+.message-content {
+  display: block;
+  font-size: 28rpx;
+  color: #333333;
+  line-height: 1.65;
+}
+
+.state-box {
+  text-align: center;
+  padding: 36rpx 0;
+}
+
+.state-text {
+  font-size: 25rpx;
+  color: #9c9c9c;
+}

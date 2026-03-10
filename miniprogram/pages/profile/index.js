@@ -176,6 +176,10 @@ Page({
     wx.navigateTo({ url: "/pages/memoir/index" });
   },
 
+  goMessages() {
+    wx.navigateTo({ url: "/pages/messages/index" });
+  },
+
   goAsk() {
     wx.navigateTo({ url: "/pages/qa/ask" });
   },

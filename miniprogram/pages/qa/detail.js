@@ -163,21 +163,6 @@ Page({
     this.setData({ submitting: true });
 
     try {
-      const checkRes = await wx.cloud.callFunction({
-        name: "contentCheck",
-        data: { type: "checkText", content: answerContent.trim() },
-      });
-
-      if (checkRes.result.code === 0 && !checkRes.result.safe) {
-        wx.showModal({
-          title: "内容提示",
-          content: checkRes.result.msg,
-          showCancel: false,
-        });
-        this.setData({ submitting: false });
-        return;
-      }
-
       const res = await wx.cloud.callFunction({
         name: "qaFunctions",
         data: {
@@ -188,7 +173,11 @@ Page({
       });
 
       if (res.result && res.result.code === 0) {
-        wx.showToast({ title: "回答成功！", icon: "success" });
+        const isWarned = res.result.auditStatus === "warned";
+        wx.showToast({
+          title: isWarned ? "回答已发布并标注提示" : "回答成功！",
+          icon: "success",
+        });
         this.setData({ answerContent: "", canSubmitAnswer: false });
         this.loadDetail();
       } else {

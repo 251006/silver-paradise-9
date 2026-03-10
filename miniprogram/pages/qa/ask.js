@@ -161,26 +161,6 @@ Page({
     this.setData({ submitting: true });
 
     try {
-      const checkContent = title.trim() + " " + (content || "").trim();
-
-      // 内容安全检测
-      if (checkContent.trim().length > 0) {
-        const checkRes = await wx.cloud.callFunction({
-          name: "contentCheck",
-          data: { type: "checkText", content: checkContent },
-        });
-
-        if (checkRes.result.code === 0 && !checkRes.result.safe) {
-          wx.showModal({
-            title: "内容提示",
-            content: checkRes.result.msg,
-            showCancel: false,
-          });
-          this.setData({ submitting: false });
-          return;
-        }
-      }
-
       // 上传图片
       wx.showLoading({ title: "上传图片中...", mask: true });
       const imageFileIds = await this.uploadImages();
@@ -198,7 +178,12 @@ Page({
 
       if (res.result && res.result.code === 0) {
         wx.removeStorageSync(DRAFT_KEY);
-        wx.showToast({ title: "提问成功！", icon: "success", duration: 1500 });
+        const isWarned = res.result.auditStatus === "warned";
+        wx.showToast({
+          title: isWarned ? "问题已发布并标注提示" : "提问成功！",
+          icon: "success",
+          duration: 1500,
+        });
 
         setTimeout(() => {
           wx.redirectTo({

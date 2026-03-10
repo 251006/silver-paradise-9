@@ -17,6 +17,34 @@
   z-index: 0;
 }
 
+.header-message-btn {
+  position: absolute;
+  top: 34rpx;
+  right: 28rpx;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1rpx solid #f4d6c2;
+}
+
+.header-message-btn:active {
+  transform: scale(0.98);
+}
+
+.header-message-icon {
+  font-size: 24rpx;
+}
+
+.header-message-text {
+  font-size: 24rpx;
+  color: #a55f2d;
+  font-weight: 600;
+}
+
 /* 用户信息区 */
 .user-header {
   position: relative;
@@ -150,10 +178,6 @@
   display: flex;
   align-items: center;
   transition: all 0.2s;
-}
-
-.function-card:nth-child(3) {
-  grid-column: 1 / 3;
 }
 
 .function-card:active {

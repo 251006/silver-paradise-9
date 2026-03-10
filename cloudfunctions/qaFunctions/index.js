@@ -7,6 +7,31 @@ const _ = db.command;
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 30;
 
+async function moderateContent({ scene, content, images }) {
+  try {
+    const res = await cloud.callFunction({
+      name: "contentCheck",
+      data: {
+        type: "checkContent",
+        scene,
+        content: content || "",
+        images: Array.isArray(images) ? images : [],
+      },
+    });
+    return (res && res.result) || { decision: "review", msg: "内容存在风险提示，将带提示发布" };
+  } catch (err) {
+    console.error("moderateContent error:", err);
+    return {
+      decision: "review",
+      riskScore: 55,
+      category: "unknown",
+      reasons: ["内容审核服务异常，已转人工审核"],
+      riskWarning: "风险提示：内容审核服务异常，请谨慎辨别信息真伪。",
+      msg: "内容存在风险提示，将带提示发布",
+    };
+  }
+}
+
 function sanitizeText(text = "", maxLen = 1000) {
   return `${text}`.trim().slice(0, maxLen);
 }
@@ -129,6 +154,17 @@ async function insertQuestion(event, wxContext) {
   if (!roleCheck.ok) return { code: -1, msg: roleCheck.msg };
 
   try {
+    const moderation = await moderateContent({
+      scene: "qa_question",
+      content: `${title}\n${content}`,
+      images,
+    });
+
+    if (moderation.decision === "reject") {
+      return { code: -1, msg: moderation.msg || "内容疑似违规，请修改后重试" };
+    }
+
+    const auditStatus = moderation.decision === "pass" ? "passed" : "warned";
     const res = await db.collection("questions").add({
       data: {
         authorId: openid,
@@ -140,13 +176,24 @@ async function insertQuestion(event, wxContext) {
         viewCount: 0,
         followerCount: 1,
         followers: [openid],
+        auditStatus,
+        riskScore: Number(moderation.riskScore || 0),
+        riskCategory: moderation.category || "normal",
+        riskWarning: moderation.riskWarning || "",
+        blockedReason: moderation.msg || "",
         createdAt: db.serverDate(),
         updatedAt: db.serverDate(),
         lastAnswerAt: null,
       },
     });
 
-    return { code: 0, questionId: res._id };
+    return {
+      code: 0,
+      questionId: res._id,
+      auditStatus,
+      riskWarning: moderation.riskWarning || "",
+      msg: auditStatus === "warned" ? "问题已发布，并附带风险提示" : "提问成功",
+    };
   } catch (err) {
     console.error("insertQuestion error:", err);
     return { code: -1, msg: "发布失败，请稍后重试" };
@@ -174,7 +221,7 @@ async function listQuestions(event, wxContext) {
     }
 
     const res = await query.skip((page - 1) * pageSize).limit(pageSize).get();
-    let questions = res.data || [];
+    let questions = (res.data || []).filter((item) => ["passed", "warned"].includes(item.auditStatus || "passed"));
     if (keyword) {
       const normalizedKeyword = keyword.toLowerCase();
       questions = questions.filter((item) => {
@@ -247,6 +294,11 @@ async function getQuestion(event, wxContext) {
     const question = qRes.data;
     if (!question) return { code: -1, msg: "问题不存在" };
 
+    const questionAuditStatus = question.auditStatus || "passed";
+    if (!["passed", "warned"].includes(questionAuditStatus) && question.authorId !== openid) {
+      return { code: -1, msg: "该问题正在审核中" };
+    }
+
     await db.collection("questions").doc(questionId).update({
       data: { viewCount: _.inc(1), updatedAt: db.serverDate() },
     });
@@ -284,7 +336,9 @@ async function getQuestion(event, wxContext) {
     // 转换问题图片URL
     question.images = (question.images || []).map(img => tempUrlMap[img] || img);
 
-    const answers = (question.answers || []).map((item) => {
+    const answers = (question.answers || [])
+      .filter((item) => ["passed", "warned"].includes(item.auditStatus || "passed") || item.authorId === openid)
+      .map((item) => {
       // 转换回答图片URL
       item.images = (item.images || []).map(img => tempUrlMap[img] || img);
       return enrichAnswer(item, userMap, openid);
@@ -343,11 +397,26 @@ async function insertAnswer(event, wxContext) {
     const question = qRes.data;
     if (!question) return { code: -1, msg: "问题不存在" };
 
+    if (!["passed", "warned"].includes(question.auditStatus || "passed")) {
+      return { code: -1, msg: "问题审核中，暂不可回答" };
+    }
+
     const existingAnswer = (question.answers || []).find((item) => item.authorId === openid);
     if (existingAnswer) {
       return { code: -1, msg: "您已回答过该问题，可在详情页继续互动" };
     }
 
+    const moderation = await moderateContent({
+      scene: "qa_answer",
+      content,
+      images,
+    });
+
+    if (moderation.decision === "reject") {
+      return { code: -1, msg: moderation.msg || "内容疑似违规，请修改后重试" };
+    }
+
+    const auditStatus = moderation.decision === "pass" ? "passed" : "warned";
     const answerId = `ans_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const answerDoc = {
       _id: answerId,
@@ -356,6 +425,10 @@ async function insertAnswer(event, wxContext) {
       images,
       likes: 0,
       likedBy: [],
+      auditStatus,
+      riskScore: Number(moderation.riskScore || 0),
+      riskCategory: moderation.category || "normal",
+      riskWarning: moderation.riskWarning || "",
       createdAt: db.serverDate(),
     };
 
@@ -368,7 +441,13 @@ async function insertAnswer(event, wxContext) {
       },
     });
 
-    return { code: 0, answerId };
+    return {
+      code: 0,
+      answerId,
+      auditStatus,
+      riskWarning: moderation.riskWarning || "",
+      msg: auditStatus === "warned" ? "回答已发布，并附带风险提示" : "回答成功",
+    };
   } catch (err) {
     console.error("insertAnswer error:", err);
     return { code: -1, msg: "回答失败，请稍后重试" };

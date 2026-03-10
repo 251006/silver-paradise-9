@@ -1,0 +1,39 @@
+<wxs src="../../utils/timeUtils.wxs" module="timeUtils" />
+
+<view class="messages-page safe-bottom">
+  <view class="messages-header">
+    <text class="messages-title">官方通知中心</text>
+    <text class="messages-subtitle">平台审核提醒、被关注和好友申请等官方通知会显示在这里</text>
+  </view>
+
+  <view wx:if="{{loading && messages.length === 0}}" class="state-box">
+    <text class="state-text">加载中...</text>
+  </view>
+
+  <view wx:elif="{{messages.length === 0}}" class="state-box">
+    <text class="state-text">暂时没有消息</text>
+  </view>
+
+  <block wx:else>
+    <view wx:for="{{messages}}" wx:key="_id" class="message-card">
+      <view class="message-head">
+        <view class="sender-avatar official-avatar">官</view>
+        <view class="sender-main">
+          <view class="sender-line">
+            <text class="sender-name">{{item.senderName || '银龄乐园官方'}}</text>
+            <text class="message-time">{{timeUtils.formatTime(item.createdAt)}}</text>
+          </view>
+          <text class="message-title">{{item.title || formatMessageType(item.messageType)}}</text>
+        </view>
+      </view>
+      <text class="message-content">{{item.content}}</text>
+    </view>
+
+    <view wx:if="{{loading}}" class="state-box">
+      <text class="state-text">加载更多...</text>
+    </view>
+    <view wx:elif="{{!hasMore}}" class="state-box">
+      <text class="state-text">没有更多消息了</text>
+    </view>
+  </block>
+</view>

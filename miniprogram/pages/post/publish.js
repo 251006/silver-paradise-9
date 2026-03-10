@@ -8,6 +8,46 @@ Page({
     maxImages: 9,
   },
 
+  // 前端快速过滤：拦截明显高风险内容，减少无效请求
+  localRiskCheck(content = "") {
+    const text = `${content || ""}`.toLowerCase();
+    const highRiskSignals = [
+      "转账",
+      "打款",
+      "保证金",
+      "验证码",
+      "银行卡",
+      "内部消息",
+      "稳赚不赔",
+      "免费领",
+      "点击链接",
+      "加微信",
+      "加qq",
+    ];
+
+    const matched = highRiskSignals.filter((item) => text.includes(item));
+    return {
+      blocked: matched.length >= 2,
+      matched,
+    };
+  },
+
+  async triggerAsyncModeration(queueId) {
+    if (!queueId) return;
+    try {
+      await wx.cloud.callFunction({
+        name: "postFunctions",
+        data: {
+          type: "processPendingPost",
+          queueId,
+        },
+      });
+    } catch (err) {
+      // 异步任务失败不打断用户流程，后续可做定时补偿
+      console.error("触发异步审核失败:", err);
+    }
+  },
+
   onContentInput(e) {
     const content = e.detail.value || "";
     this.setData({
@@ -111,33 +151,24 @@ Page({
       return;
     }
 
+    const riskCheck = this.localRiskCheck(content);
+    if (riskCheck.blocked) {
+      wx.showToast({
+        title: "内容疑似风险较高，请修改后重试",
+        icon: "none",
+      });
+      return;
+    }
+
     this.setData({ submitting: true });
 
     try {
-      // 1. 内容安全检测
-      if (content.trim().length > 0) {
-        const checkRes = await wx.cloud.callFunction({
-          name: "contentCheck",
-          data: { type: "checkText", content: content.trim() },
-        });
-
-        if (checkRes.result.code === 0 && !checkRes.result.safe) {
-          wx.showModal({
-            title: "内容提示",
-            content: checkRes.result.msg,
-            showCancel: false,
-          });
-          this.setData({ submitting: false });
-          return;
-        }
-      }
-
-      // 2. 上传图片
+      // 1. 上传图片
       wx.showLoading({ title: "上传图片中...", mask: true });
       const imageFileIds = await this.uploadImages();
       wx.hideLoading();
 
-      // 3. 发布动态
+      // 2. 先入审核队列，立即返回成功态
       const res = await wx.cloud.callFunction({
         name: "postFunctions",
         data: {
@@ -147,21 +178,39 @@ Page({
         },
       });
 
+      console.log("[publish] insertPost result:", res && res.result ? res.result : res);
+
       if (res.result.code === 0) {
-        wx.showToast({ title: "发布成功！", icon: "success", duration: 1500 });
+        const queueId = res.result.queueId || "";
+        const isSyncFallback = res.result.fallbackMode === "sync";
+
+        // 不阻塞用户：后台继续异步审核
+        if (queueId) {
+          this.triggerAsyncModeration(queueId);
+        }
+
+        wx.showToast({
+          title: isSyncFallback ? (res.result.msg || "发送成功") : "发送成功，审核中",
+          icon: "success",
+          duration: 1500,
+        });
         setTimeout(() => {
           wx.navigateBack();
         }, 1500);
       } else {
         wx.showToast({
-          title: res.result.msg || "发布失败",
+          title: (res.result && res.result.msg) || "发布失败",
           icon: "none",
         });
       }
     } catch (err) {
       console.error("发布失败", err);
       wx.hideLoading();
-      wx.showToast({ title: err.message || "发布失败，请重试", icon: "none" });
+      const detail =
+        (err && err.errMsg) ||
+        (err && err.message) ||
+        "发布失败，请重试";
+      wx.showToast({ title: detail, icon: "none" });
     } finally {
       this.setData({ submitting: false });
     }

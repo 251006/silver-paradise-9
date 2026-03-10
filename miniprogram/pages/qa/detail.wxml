@@ -24,6 +24,10 @@
       </view>
 
       <text wx:if="{{question.content}}" class="question-content">{{question.content}}</text>
+      <view wx:if="{{question.auditStatus === 'warned' && question.riskWarning}}" class="detail-risk-banner">
+        <text class="qa-risk-label">风险提示</text>
+        <text class="qa-risk-text">{{question.riskWarning}}</text>
+      </view>
 
       <!-- 问题图片展示 -->
       <view class="question-images" wx:if="{{question.images && question.images.length > 0}}">
@@ -80,6 +84,10 @@
           </view>
         </view>
         <text class="answer-content">{{item.content}}</text>
+        <view wx:if="{{item.auditStatus === 'warned' && item.riskWarning}}" class="detail-risk-banner">
+          <text class="qa-risk-label">风险提示</text>
+          <text class="qa-risk-text">{{item.riskWarning}}</text>
+        </view>
 
         <!-- 回答图片展示 -->
         <view class="answer-images" wx:if="{{item.images && item.images.length > 0}}">

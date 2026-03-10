@@ -66,6 +66,10 @@
 
       <text class="qa-question-title">{{item.title}}</text>
       <text wx:if="{{item.excerpt}}" class="qa-question-desc">{{item.excerpt}}</text>
+      <view wx:if="{{item.auditStatus === 'warned' && item.riskWarning}}" class="qa-risk-banner">
+        <text class="qa-risk-label">风险提示</text>
+        <text class="qa-risk-text">{{item.riskWarning}}</text>
+      </view>
 
       <view class="qa-tags">
         <text class="qa-tag qa-tag-hot">{{item.hotText}}</text>

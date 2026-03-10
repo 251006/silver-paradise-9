@@ -1,0 +1,93 @@
+<view class="post-detail-page">
+  <view wx:if="{{loading}}" class="loading-box">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <block wx:elif="{{post}}">
+    <view class="post-hero" wx:if="{{post.images && post.images.length > 0}}">
+      <swiper class="hero-swiper" circular="{{post.images.length > 1}}" indicator-dots="{{post.images.length > 1}}" indicator-color="rgba(255,255,255,.55)" indicator-active-color="#FFFFFF" autoplay="false">
+        <swiper-item wx:for="{{post.images}}" wx:key="index">
+          <image class="hero-image" src="{{item}}" mode="aspectFill" data-src="{{item}}" bindtap="previewImage" />
+        </swiper-item>
+      </swiper>
+      <view class="hero-count" wx:if="{{post.images.length > 1}}">
+        <text>{{post.images.length}}图</text>
+      </view>
+    </view>
+
+    <view class="post-card">
+      <view class="post-head">
+        <view class="author-row">
+          <image wx:if="{{post.authorAvatarUrl}}" class="author-avatar" src="{{post.authorAvatarUrl}}" mode="aspectFill" />
+          <view wx:else class="author-avatar author-avatar-fallback">
+            <text>{{post.authorName ? post.authorName[0] : '匿'}}</text>
+          </view>
+          <view class="author-meta">
+            <text class="author-name">{{post.authorName}}</text>
+            <text class="post-time">{{post.displayTime}}</text>
+          </view>
+        </view>
+      </view>
+
+      <text class="post-content">{{post.content}}</text>
+
+      <view wx:if="{{post.auditStatus === 'warned' && post.riskWarning}}" class="risk-banner">
+        <text class="risk-label">风险提示</text>
+        <text class="risk-text">{{post.riskWarning}}</text>
+      </view>
+
+      <view class="post-stats">
+        <view class="stat-btn {{post.liked ? 'stat-btn-active' : ''}}" bindtap="onLikePost">
+          <text class="stat-icon">{{post.liked ? '♥' : '♡'}}</text>
+          <text>{{post.likes}}</text>
+        </view>
+        <view class="stat-chip">
+          <text>评论 {{comments.length}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="comments-section">
+      <view class="section-head">
+        <text class="section-title">评论 {{comments.length}}</text>
+      </view>
+
+      <view wx:if="{{comments.length === 0}}" class="empty-box">
+        <text class="empty-text">还没有评论，来抢第一个</text>
+      </view>
+
+      <view wx:for="{{comments}}" wx:key="_id" class="comment-card">
+        <view class="comment-head">
+          <image wx:if="{{item.authorAvatarUrl}}" class="comment-avatar" src="{{item.authorAvatarUrl}}" mode="aspectFill" />
+          <view wx:else class="comment-avatar comment-avatar-fallback">
+            <text>{{item.authorName ? item.authorName[0] : '匿'}}</text>
+          </view>
+          <view class="comment-meta">
+            <text class="comment-author">{{item.authorName}}</text>
+            <text class="comment-time">{{item.displayTime}}</text>
+          </view>
+        </view>
+        <text class="comment-content">{{item.content}}</text>
+        <view wx:if="{{item.auditStatus === 'warned' && item.riskWarning}}" class="risk-banner risk-banner-comment">
+          <text class="risk-label">风险提示</text>
+          <text class="risk-text">{{item.riskWarning}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="comment-editor">
+      <input
+        class="comment-input"
+        placeholder="说点什么..."
+        value="{{commentContent}}"
+        bindinput="onCommentInput"
+        maxlength="300"
+        confirm-type="send"
+        bindconfirm="submitComment"
+      />
+      <button class="comment-submit" bindtap="submitComment" disabled="{{submitting || !canSubmitComment}}">
+        {{submitting ? '发送中' : '发送'}}
+      </button>
+    </view>
+  </block>
+</view>

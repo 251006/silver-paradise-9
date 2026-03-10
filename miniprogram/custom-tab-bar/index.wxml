@@ -15,4 +15,8 @@
       {{item.text}}
     </text>
   </view>
+
+  <view class="tab-bar-center" bindtap="onCenterAction">
+    <text class="tab-bar-center-plus">+</text>
+  </view>
 </view>

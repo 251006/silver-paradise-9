@@ -4,6 +4,7 @@
   "description": "内容安全审核云函数",
   "main": "index.js",
   "dependencies": {
+    "node-fetch": "^2.7.0",
     "wx-server-sdk": "~2.4.0"
   }
 }
