@@ -69,17 +69,31 @@
 }
 
 .image-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20rpx;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
 }
 
 .image-item {
   position: relative;
-  width: 200rpx;
+  width: 100%;
   height: 200rpx;
   border-radius: 12rpx;
   overflow: hidden;
+  background: #F5F5F5;
+}
+
+/* 只有一张图片时显示大图 */
+.image-grid .image-item:first-child:last-of-type {
+  grid-column: span 3;
+  height: 400rpx;
+}
+
+/* 两张图片时各占一半 */
+.image-grid .image-item:first-child:nth-last-of-type(2),
+.image-grid .image-item:nth-child(2):last-of-type {
+  grid-column: span 1.5;
+  height: 300rpx;
 }
 
 .uploaded-image {
@@ -91,23 +105,25 @@
   position: absolute;
   top: 8rpx;
   right: 8rpx;
-  width: 40rpx;
-  height: 40rpx;
-  background: rgba(0, 0, 0, 0.6);
+  width: 44rpx;
+  height: 44rpx;
+  background: rgba(0, 0, 0, 0.65);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 10;
 }
 
 .delete-icon {
   color: #FFFFFF;
-  font-size: 28rpx;
+  font-size: 32rpx;
   line-height: 1;
+  font-weight: 300;
 }
 
 .add-image-btn {
-  width: 200rpx;
+  width: 100%;
   height: 200rpx;
   border: 2rpx dashed #E0E0E0;
   border-radius: 12rpx;
@@ -115,13 +131,19 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #F9F9F9;
+  background: #FAFAFA;
+  transition: all 0.3s;
+}
+
+.add-image-btn:active {
+  background: #F0F0F0;
 }
 
 .add-icon {
-  font-size: 48rpx;
+  font-size: 52rpx;
   color: #CCCCCC;
   margin-bottom: 8rpx;
+  line-height: 1;
 }
 
 .add-text {
