@@ -66,6 +66,10 @@
   align-items: center;
 }
 
+.author-row-clickable {
+  flex: 1;
+}
+
 .author-avatar,
 .comment-avatar {
   width: 76rpx;
@@ -97,6 +101,24 @@
   font-size: 30rpx;
   font-weight: 600;
   color: #191A1F;
+}
+
+.follow-btn {
+  min-width: 136rpx;
+  height: 60rpx;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #16151d;
+  color: #ffffff;
+  font-size: 24rpx;
+}
+
+.follow-btn-active {
+  background: #f1f3f7;
+  color: #565c68;
 }
 
 .post-time,

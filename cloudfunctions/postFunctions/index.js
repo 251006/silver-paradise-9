@@ -7,6 +7,7 @@ const _ = db.command;
 const POST_QUEUE_COLLECTION = "post_publish_queue";
 const USER_MESSAGE_COLLECTION = "user_messages";
 const POST_COMMENT_COLLECTION = "post_comments";
+const USER_FOLLOW_COLLECTION = "user_follows";
 const OFFICIAL_BOT = {
   id: "official_bot",
   name: "银龄乐园官方机器人",
@@ -79,6 +80,12 @@ function buildInlineCommentId() {
   return `inline_comment_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function isPostVisibleForPublic(auditStatus) {
+  // 兼容历史数据：旧版本可能写入 approved。
+  if (!auditStatus) return true;
+  return ["passed", "warned", "approved"].includes(auditStatus);
+}
+
 async function buildTempUrlMap(fileIds = []) {
   const cloudFileIds = [...new Set(fileIds.filter((item) => item && item.startsWith("cloud://")))];
   if (cloudFileIds.length === 0) {
@@ -123,6 +130,36 @@ async function getUsersProfileMap(userIds = []) {
     };
   });
   return profileMap;
+}
+
+async function getAuthorFollowState(currentUserId, authorId) {
+  if (!currentUserId || !authorId || currentUserId === authorId) {
+    return false;
+  }
+
+  try {
+    const followDocId = `${currentUserId}__${authorId}`;
+    const res = await db.collection(USER_FOLLOW_COLLECTION).doc(followDocId).get();
+    return !!res.data;
+  } catch (err) {
+    const code = Number((err && err.errCode) || 0);
+    if (code === -1 || code === -502005) {
+      return false;
+    }
+    console.error("getAuthorFollowState error:", err);
+    return false;
+  }
+}
+
+function buildPostCard(post, profileMap, tempUrlMap, openid) {
+  const profile = profileMap[post.authorId] || { nickname: "匿名用户", avatarUrl: "" };
+  return {
+    ...post,
+    authorName: profile.nickname,
+    authorAvatarUrl: profile.avatarUrl,
+    images: ensureArray(post.images).map((item) => tempUrlMap[item] || item),
+    liked: ensureArray(post.likedBy).includes(openid),
+  };
 }
 
 async function sendOfficialAuditMessage({ receiverId, queueId, moderation }) {
@@ -450,28 +487,14 @@ async function listMyPosts(event, wxContext) {
   }
 }
 
-// 查询所有老人用户的动态（公共Feed）
-async function listAllPosts(event) {
+// 查询所有动态（公共Feed）
+async function listAllPosts(event, wxContext) {
   const { page = 1, pageSize = 20 } = event;
+  const openid = wxContext.OPENID;
 
   try {
-    // 先获取所有老人用户ID
-    const elderRes = await db
-      .collection("users")
-      .where({ role: "elder" })
-      .field({ _id: true })
-      .limit(1000)
-      .get();
-
-    const elderIds = elderRes.data.map((u) => u._id);
-
-    if (elderIds.length === 0) {
-      return { code: 0, posts: [] };
-    }
-
     const res = await db
       .collection("posts")
-      .where({ authorId: _.in(elderIds) })
       .orderBy("createdAt", "desc")
       .skip((page - 1) * pageSize)
       .limit(pageSize)
@@ -510,9 +533,7 @@ async function listAllPosts(event) {
       });
     }
 
-    const visiblePosts = res.data.filter((p) => ["passed", "warned"].includes(p.auditStatus || "passed"));
-
-    const posts = visiblePosts.map((p) => {
+    const posts = (res.data || []).map((p) => {
       const rawAvatar = avatarMap[p.authorId] || "";
       // 转换图片URL
       const processedImages = (p.images || []).map(img => tempUrlMap[img] || img);
@@ -521,12 +542,66 @@ async function listAllPosts(event) {
         images: processedImages,
         authorName: nameMap[p.authorId] || "匿名用户",
         authorAvatarUrl: tempUrlMap[rawAvatar] || rawAvatar,
+        liked: ensureArray(p.likedBy).includes(openid),
       };
     });
+
+    console.log(
+      `${LOG_PREFIX} listAllPosts`,
+      JSON.stringify({
+        page,
+        pageSize,
+        dbCount: (res.data || []).length,
+        resultCount: posts.length,
+      })
+    );
 
     return { code: 0, posts };
   } catch (err) {
     console.error("listAllPosts error:", err);
+    return { code: -1, msg: "查询失败" };
+  }
+}
+
+async function listUserPosts(event, wxContext) {
+  const openid = wxContext.OPENID;
+  const userId = `${event.userId || ""}`.trim();
+  const page = Math.max(1, Number(event.page || 1));
+  const pageSize = Math.max(1, Math.min(50, Number(event.pageSize || 20)));
+
+  if (!userId) {
+    return { code: -1, msg: "userId不能为空" };
+  }
+
+  try {
+    const res = await db
+      .collection("posts")
+      .where({ authorId: userId })
+      .orderBy("createdAt", "desc")
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .get();
+
+    const visiblePosts = (res.data || []).filter((item) => {
+      const auditStatus = item.auditStatus || "passed";
+      if (userId === openid) {
+        return true;
+      }
+      return isPostVisibleForPublic(auditStatus);
+    });
+
+    const profileMap = await getUsersProfileMap([userId]);
+    const tempUrlMap = await buildTempUrlMap(
+      visiblePosts.flatMap((item) => ensureArray(item.images))
+    );
+
+    return {
+      code: 0,
+      posts: visiblePosts.map((item) => buildPostCard(item, profileMap, tempUrlMap, openid)),
+      hasMore: visiblePosts.length === pageSize,
+    };
+  } catch (err) {
+    console.error("listUserPosts error:", err);
     return { code: -1, msg: "查询失败" };
   }
 }
@@ -633,6 +708,7 @@ async function getPost(event, wxContext) {
     const tempUrlMap = await buildTempUrlMap([...ensureArray(post.images), ...comments.flatMap((item) => ensureArray(item.images))]);
 
     const postProfile = profileMap[post.authorId] || { nickname: "匿名用户", avatarUrl: "" };
+    const isFollowingAuthor = await getAuthorFollowState(openid, post.authorId);
     const resultPost = {
       ...post,
       authorName: postProfile.nickname,
@@ -640,6 +716,8 @@ async function getPost(event, wxContext) {
       images: ensureArray(post.images).map((item) => tempUrlMap[item] || item),
       liked: ensureArray(post.likedBy).includes(openid),
       commentCount: Number(post.commentCount || comments.length || 0),
+      isAuthorSelf: post.authorId === openid,
+      isFollowingAuthor,
     };
 
     const resultComments = comments.map((item) => {
@@ -795,7 +873,9 @@ exports.main = async (event, context) => {
     case "listMyPosts":
       return listMyPosts(event, wxContext);
     case "listAllPosts":
-      return listAllPosts(event);
+      return listAllPosts(event, wxContext);
+    case "listUserPosts":
+      return listUserPosts(event, wxContext);
     case "listMyMessages":
       return listMyMessages(event, wxContext);
     case "likePost":

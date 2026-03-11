@@ -12,6 +12,8 @@
     "pages/settings/index",
     "pages/post/publish",
     "pages/post/detail",
+    "pages/userProfile/index",
+    "pages/followList/index",
     "pages/memoir/index",
     "pages/memoir/detail",
     "pages/memoir/create"

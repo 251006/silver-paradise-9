@@ -126,9 +126,15 @@ Page({
       this.getTabBar().setData({ selected: 2 });
     }
 
-    if (this.data.activeTab === 0 && this.data.posts.length > 0) return;
-    if (this.data.activeTab === 1 && this.data.questions.length > 0) return;
-    this._loadTabWithCache(this.data.activeTab);
+    // 发现页优先实时数据，避免历史缓存导致“有些动态看不到”。
+    if (this.data.activeTab === 0) {
+      this._clearCache(POSTS_CACHE_KEY);
+      this.loadCurrentTabData(0);
+      return;
+    }
+
+    if (this.data.questions.length > 0) return;
+    this._loadTabWithCache(1);
   },
 
   _loadTabWithCache(tabIndex) {

@@ -575,6 +575,71 @@ async function listMyAnswers(event, wxContext) {
   }
 }
 
+async function listUserQuestions(event, wxContext) {
+  const openid = wxContext.OPENID;
+  const userId = sanitizeText(event.userId || openid, 64);
+  const page = Math.max(1, Number(event.page || 1));
+  const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, Number(event.pageSize || DEFAULT_PAGE_SIZE)));
+
+  if (!userId) {
+    return { code: -1, msg: "参数错误" };
+  }
+
+  try {
+    const res = await db
+      .collection("questions")
+      .where({ authorId: userId })
+      .orderBy("createdAt", "desc")
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .get();
+
+    const questions = (res.data || []).filter((item) => {
+      const auditStatus = item.auditStatus || "passed";
+      if (item.authorId === openid) {
+        return true;
+      }
+      return ["passed", "warned"].includes(auditStatus);
+    });
+
+    const authorMap = await getUserMap([userId]);
+    const cloudFileIds = [...new Set(
+      Object.values(authorMap)
+        .map((user) => user.avatarUrl)
+        .filter((url) => url && url.startsWith("cloud://"))
+        .concat(...questions.map((question) => (question.images || []).filter((img) => img.startsWith("cloud://"))))
+    )];
+
+    const tempUrlMap = {};
+    if (cloudFileIds.length > 0) {
+      const tempRes = await cloud.getTempFileURL({ fileList: cloudFileIds });
+      tempRes.fileList.forEach((item) => {
+        if (item.tempFileURL) {
+          tempUrlMap[item.fileID] = item.tempFileURL;
+        }
+      });
+    }
+
+    Object.values(authorMap).forEach((user) => {
+      if (user.avatarUrl && tempUrlMap[user.avatarUrl]) {
+        user.avatarUrl = tempUrlMap[user.avatarUrl];
+      }
+    });
+
+    return {
+      code: 0,
+      questions: questions.map((item) => {
+        item.images = (item.images || []).map((img) => tempUrlMap[img] || img);
+        return enrichQuestion(item, authorMap, openid);
+      }),
+      hasMore: questions.length === pageSize,
+    };
+  } catch (err) {
+    console.error("listUserQuestions error:", err);
+    return { code: -1, msg: "查询失败，请稍后重试" };
+  }
+}
+
 // 删除问题
 async function deleteQuestion(event, wxContext) {
   const openid = wxContext.OPENID;
@@ -623,6 +688,8 @@ exports.main = async (event, context) => {
       return followQuestion(event, wxContext);
     case "listMyAnswers":
       return listMyAnswers(event, wxContext);
+    case "listUserQuestions":
+      return listUserQuestions(event, wxContext);
     case "deleteQuestion":
       return deleteQuestion(event, wxContext);
     default:

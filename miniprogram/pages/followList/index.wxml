@@ -1,0 +1,37 @@
+<view class="follow-list-page">
+  <view wx:if="{{list.length === 0 && !loading}}" class="empty-box">
+    <text class="empty-text">{{mode === 'followers' ? '还没有粉丝' : '还没有关注任何人'}}</text>
+  </view>
+
+  <view wx:for="{{list}}" wx:key="userId" class="follow-card">
+    <view class="follow-user" bindtap="goUserProfile" data-id="{{item.userId}}">
+      <image wx:if="{{item.avatarUrl}}" class="follow-avatar" src="{{item.avatarUrl}}" mode="aspectFill" />
+      <view wx:else class="follow-avatar follow-avatar-fallback">
+        <text>{{item.nickname ? item.nickname[0] : '匿'}}</text>
+      </view>
+
+      <view class="follow-meta">
+        <text class="follow-name">{{item.nickname || '匿名用户'}}</text>
+        <text class="follow-role">{{item.role === 'elder' ? '长辈用户' : '年轻用户'}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{mode === 'followers'}}" class="follow-actions">
+      <button
+        class="follow-btn {{item.isFollowing ? 'follow-btn-active' : ''}}"
+        data-id="{{item.userId}}"
+        disabled="{{item.isFollowing}}"
+        bindtap="onFollowBack"
+      >
+        {{item.isFollowing ? '已回关' : '回关'}}
+      </button>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-box">
+    <text class="loading-text">加载中...</text>
+  </view>
+  <view wx:if="{{!hasMore && list.length > 0}}" class="loading-box">
+    <text class="loading-text">已经到底了</text>
+  </view>
+</view>

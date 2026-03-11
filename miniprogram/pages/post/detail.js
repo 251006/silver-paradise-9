@@ -43,6 +43,8 @@ Page({
       likes: Number(post.likes || 0),
       commentCount: Number(post.commentCount || 0),
       liked: !!post.liked,
+      isAuthorSelf: !!post.isAuthorSelf,
+      isFollowingAuthor: !!post.isFollowingAuthor,
     };
   },
 
@@ -126,6 +128,46 @@ Page({
         this.setData({
           "post.likes": Number(res.result.likes || 0),
           "post.liked": !!res.result.liked,
+        });
+      }
+    } catch (err) {
+      wx.showToast({ title: "操作失败，请重试", icon: "none" });
+    }
+  },
+
+  onAuthorTap() {
+    const post = this.data.post;
+    if (!post || !post.authorId) return;
+
+    if (post.isAuthorSelf) {
+      wx.switchTab({ url: "/pages/profile/index" });
+      return;
+    }
+
+    wx.navigateTo({ url: `/pages/userProfile/index?userId=${post.authorId}` });
+  },
+
+  async onToggleFollowAuthor() {
+    const post = this.data.post;
+    if (!post || !post.authorId || post.isAuthorSelf) return;
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: "userFunctions",
+        data: {
+          type: "toggleFollowUser",
+          userId: post.authorId,
+        },
+      });
+
+      if (res.result && res.result.code === 0) {
+        this.setData({
+          "post.isFollowingAuthor": !!res.result.followed,
+        });
+      } else {
+        wx.showToast({
+          title: (res.result && res.result.msg) || "操作失败",
+          icon: "none",
         });
       }
     } catch (err) {

@@ -17,7 +17,7 @@
 
     <view class="post-card">
       <view class="post-head">
-        <view class="author-row">
+        <view class="author-row author-row-clickable" bindtap="onAuthorTap">
           <image wx:if="{{post.authorAvatarUrl}}" class="author-avatar" src="{{post.authorAvatarUrl}}" mode="aspectFill" />
           <view wx:else class="author-avatar author-avatar-fallback">
             <text>{{post.authorName ? post.authorName[0] : '匿'}}</text>
@@ -26,6 +26,13 @@
             <text class="author-name">{{post.authorName}}</text>
             <text class="post-time">{{post.displayTime}}</text>
           </view>
+        </view>
+        <view
+          wx:if="{{!post.isAuthorSelf}}"
+          class="follow-btn {{post.isFollowingAuthor ? 'follow-btn-active' : ''}}"
+          catchtap="onToggleFollowAuthor"
+        >
+          <text>{{post.isFollowingAuthor ? '已关注' : '+ 关注'}}</text>
         </view>
       </view>
 

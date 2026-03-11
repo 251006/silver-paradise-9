@@ -1,128 +1,107 @@
 <wxs src="../../utils/timeUtils.wxs" module="timeUtils" />
 
 <view class="profile-page safe-bottom">
-  <!-- 顶部背景 -->
   <view class="profile-bg"></view>
 
-  <view class="header-message-btn" bindtap="goMessages">
-    <text class="header-message-icon">🔔</text>
-    <text class="header-message-text">消息</text>
+  <view class="header-action" bindtap="goMessages">
+    <text class="header-action-icon">🔔</text>
+    <text class="header-action-text">消息</text>
   </view>
-  
-  <!-- 用户信息区 -->
+
   <view class="user-header">
-    <!-- 头像 -->
     <view class="avatar-container" bindtap="goSettings">
-      <image 
-        class="avatar-image" 
-        src="{{avatarUrl}}" 
+      <image
+        class="avatar-image"
+        src="{{avatarUrl}}"
         mode="aspectFill"
         binderror="onAvatarError"
       ></image>
     </view>
-    
-    <!-- 用户信息 -->
+
     <view class="user-info">
       <view class="user-name-row">
         <text class="user-name">{{nickname}}</text>
+        <view class="role-badge">
+          <text>{{role === 'elder' ? '长辈' : '年轻人'}}</text>
+        </view>
       </view>
-      <view class="user-id-row">
-        <text class="user-id-label">银龄用户：</text>
-        <text class="user-id">{{openid.length > 12 ? openid.substring(0, 12) + '...' : openid || '未知'}}</text>
-      </view>
-      <view class="user-location">
-        <text class="location-icon">📍</text>
-        <text class="location-text">{{role === 'elder' ? '长辈' : '年轻人'}}</text>
-      </view>
+      <text class="user-id">银龄号：{{openid.length > 12 ? openid.substring(0, 12) + '...' : openid || '未知'}}</text>
+      <text class="user-bio">{{role === 'elder' ? '把生活写成温柔的笔记。' : '把问题抛向社区，等经验落下来。'}}</text>
     </view>
   </view>
-  
-  <!-- 简介区域 -->
-  <view class="bio-section">
-    <text class="bio-hint">点击这里，填写简介</text>
-  </view>
-  
-  <!-- 统计数据 -->
+
   <view class="stats-section">
-    <view class="stat-item" wx:if="{{role === 'elder'}}">
-      <text class="stat-number">{{postCount}}</text>
-      <text class="stat-label">我的动态</text>
+    <view class="stat-item stat-item-clickable" bindtap="goFollowingList">
+      <text class="stat-number">{{followingCount}}</text>
+      <text class="stat-label">关注</text>
     </view>
-    <view class="stat-item" wx:if="{{role === 'young'}}">
-      <text class="stat-number">{{questionCount}}</text>
-      <text class="stat-label">我的提问</text>
+    <view class="stat-item stat-item-clickable" bindtap="goFollowerList">
+      <text class="stat-number">{{followerCount}}</text>
+      <text class="stat-label">粉丝</text>
     </view>
     <view class="stat-item">
       <text class="stat-number">{{likeCount}}</text>
       <text class="stat-label">获赞</text>
     </view>
-    <view class="stat-item">
-      <text class="stat-number">0</text>
-      <text class="stat-label">收藏</text>
-    </view>
   </view>
-  
-  <!-- 功能卡片 -->
+
   <view class="function-cards">
-    <!-- 老人用户功能 -->
     <block wx:if="{{role === 'elder'}}">
       <view class="function-card" bindtap="goPublish">
         <view class="function-icon">✏️</view>
         <view class="function-info">
           <text class="function-title">发布动态</text>
-          <text class="function-desc">分享生活点滴</text>
+          <text class="function-desc">把最近的生活分享给大家</text>
         </view>
       </view>
       <view class="function-card" bindtap="goMemoir">
         <view class="function-icon">📝</view>
         <view class="function-info">
           <text class="function-title">我的回忆录</text>
-          <text class="function-desc">记录珍贵回忆</text>
+          <text class="function-desc">继续整理值得留下的片段</text>
         </view>
       </view>
     </block>
-    
-    <!-- 年轻用户功能 -->
+
     <block wx:else>
-      <view class="function-card" bindtap="goAsk">
+      <view class="function-card function-card-single" bindtap="goAsk">
         <view class="function-icon">❓</view>
         <view class="function-info">
           <text class="function-title">我要提问</text>
-          <text class="function-desc">获取长辈建议</text>
+          <text class="function-desc">向长辈请教，收集不同的人生答案</text>
         </view>
       </view>
     </block>
   </view>
 
-  <!-- 我的动态列表（仅老人可见） -->
-  <block wx:if="{{role === 'elder'}}">
-    <view class="section-header">
-      <text class="section-title">我的动态</text>
-      <text class="section-count">共 {{posts.length}} 条</text>
-    </view>
+  <view class="section-header">
+    <text class="section-title">{{role === 'elder' ? '我的动态' : '我的提问'}}</text>
+    <text class="section-count">{{role === 'elder' ? postCount : questionCount}} 条</text>
+  </view>
 
-    <view wx:if="{{loading}}" class="loading-box">
-      <text class="loading-text">加载中...</text>
-    </view>
+  <view wx:if="{{loading}}" class="loading-box">
+    <text class="loading-text">加载中...</text>
+  </view>
 
-    <view wx:elif="{{posts.length === 0}}" class="empty-state">
-      <text class="empty-state-text">还没有发布动态，去发一条吧</text>
+  <block wx:elif="{{role === 'elder'}}">
+    <view wx:if="{{posts.length === 0}}" class="empty-state">
+      <text class="empty-state-text">还没有发布动态，去记录今天的故事吧</text>
     </view>
 
     <block wx:else>
-      <view wx:for="{{posts}}" wx:key="_id" class="post-card card">
+      <view wx:for="{{posts}}" wx:key="_id" class="post-card" bindtap="goPostDetail" data-id="{{item._id}}">
         <text class="post-content">{{item.content}}</text>
         <view class="post-footer">
           <text class="post-time">{{timeUtils.formatTime(item.createdAt)}}</text>
           <view class="post-actions">
-            <view class="action-item">
-              <text class="action-icon">👍</text>
+            <view class="action-item" catchtap="onLikePost" data-id="{{item._id}}">
+              <text class="action-icon">{{item.liked ? '♥' : '♡'}}</text>
               <text class="action-count">{{item.likes || 0}}</text>
             </view>
-            <view class="action-item memoir-btn" bindtap="addToMemoir" data-id="{{item._id}}">
+            <view class="action-item memoir-btn" catchtap="addToMemoir" data-id="{{item._id}}">
               <text class="action-text">加入回忆录</text>
             </view>
-            <view class="action-item delete-btn" bindtap="deletePost" data-id="{{item._id}}">
+            <view class="action-item delete-btn" catchtap="deletePost" data-id="{{item._id}}">
               <text class="action-text">删除</text>
             </view>
           </view>
@@ -131,19 +110,21 @@
     </block>
   </block>
 
-  <!-- 年轻用户内容区 -->
   <block wx:else>
-    <view class="section-header">
-      <text class="section-title">我的提问</text>
-      <text class="section-count">共 {{questionCount}} 个</text>
+    <view wx:if="{{questions.length === 0}}" class="empty-state">
+      <text class="empty-state-text">还没有提问，去发起第一个问题吧</text>
     </view>
 
-    <view wx:if="{{loading}}" class="loading-box">
-      <text class="loading-text">加载中...</text>
-    </view>
-
-    <view wx:else class="empty-state">
-      <text class="empty-state-text">功能开发中，敬请期待</text>
-    </view>
+    <block wx:else>
+      <view wx:for="{{questions}}" wx:key="_id" class="question-card" bindtap="goQuestionDetail" data-id="{{item._id}}">
+        <text class="question-title">{{item.title}}</text>
+        <text wx:if="{{item.content}}" class="question-content">{{item.content}}</text>
+        <view class="question-meta-row">
+          <text class="question-meta">{{item.answerCount || 0}} 回答</text>
+          <text class="question-meta">{{item.viewCount || 0}} 浏览</text>
+          <text class="question-meta">{{timeUtils.formatTime(item.createdAt)}}</text>
+        </view>
+      </view>
+    </block>
   </block>
 </view>

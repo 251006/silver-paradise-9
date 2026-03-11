@@ -1,0 +1,130 @@
+<wxs src="../../utils/timeUtils.wxs" module="timeUtils" />
+
+<view class="user-profile-page">
+  <view wx:if="{{loading}}" class="status-box">
+    <text class="status-text">加载中...</text>
+  </view>
+
+  <block wx:elif="{{profile}}">
+    <view class="profile-top-bg"></view>
+
+    <view class="profile-top-card">
+      <view class="profile-main-row">
+        <image wx:if="{{profile.avatarUrl}}" class="profile-avatar" src="{{profile.avatarUrl}}" mode="aspectFill" />
+        <view wx:else class="profile-avatar profile-avatar-fallback">
+          <text>{{profile.nickname ? profile.nickname[0] : '匿'}}</text>
+        </view>
+
+        <view class="profile-main-info">
+          <text class="profile-name">{{profile.nickname || '匿名用户'}}</text>
+          <text class="profile-id">银龄号：{{profile.openid && profile.openid.length > 12 ? profile.openid.substring(0, 12) + '...' : profile.openid || '未知'}}</text>
+          <view class="profile-tag-row">
+            <view class="profile-tag">
+              <text>{{profile.role === 'elder' ? '长辈用户' : '年轻用户'}}</text>
+            </view>
+            <text class="profile-tag-text">{{profile.role === 'elder' ? '持续分享生活与经验' : '持续提问与记录成长'}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{!profile.isSelf}}" class="profile-actions-row">
+        <button class="follow-action {{profile.isFollowing ? 'follow-action-active' : ''}}" bindtap="onToggleFollow" loading="{{followLoading}}">
+          {{profile.isFollowing ? '已关注' : '关注'}}
+        </button>
+      </view>
+
+      <view class="profile-stats-row">
+        <view class="profile-stat-item">
+          <text class="profile-stat-number">{{profile.followingCount || 0}}</text>
+          <text class="profile-stat-label">关注</text>
+        </view>
+        <view class="profile-stat-item">
+          <text class="profile-stat-number">{{profile.followerCount || 0}}</text>
+          <text class="profile-stat-label">粉丝</text>
+        </view>
+        <view class="profile-stat-item">
+          <text class="profile-stat-number">{{profile.likeCount || 0}}</text>
+          <text class="profile-stat-label">获赞</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="content-section">
+      <view class="content-section-head">
+        <text class="content-section-title">{{profile.role === 'elder' ? '笔记' : '提问'}}</text>
+      </view>
+
+      <block wx:if="{{profile.role === 'elder'}}">
+        <view wx:if="{{posts.length === 0}}" class="status-box status-box-light">
+          <text class="status-text">还没有公开内容</text>
+        </view>
+
+        <view wx:else class="masonry">
+          <view class="masonry-col">
+            <view wx:for="{{postsLeft}}" wx:key="_id" class="note-card" bindtap="goPostDetail" data-id="{{item._id}}">
+              <image
+                wx:if="{{item.coverImage}}"
+                class="note-cover"
+                src="{{item.coverImage}}"
+                mode="aspectFill"
+                data-src="{{item.coverImage}}"
+                catchtap="previewImage"
+              />
+              <view wx:else class="note-cover note-cover-fallback">
+                <text class="note-cover-fallback-text">{{item.coverFallbackText}}</text>
+              </view>
+              <view class="note-body">
+                <text class="note-title">{{item.previewTitle}}</text>
+                <view class="note-foot">
+                  <text class="note-foot-meta">{{timeUtils.formatTime(item.createdAt)}}</text>
+                  <text class="note-foot-meta">♡ {{item.likes || 0}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+
+          <view class="masonry-col">
+            <view wx:for="{{postsRight}}" wx:key="_id" class="note-card" bindtap="goPostDetail" data-id="{{item._id}}">
+              <image
+                wx:if="{{item.coverImage}}"
+                class="note-cover"
+                src="{{item.coverImage}}"
+                mode="aspectFill"
+                data-src="{{item.coverImage}}"
+                catchtap="previewImage"
+              />
+              <view wx:else class="note-cover note-cover-fallback">
+                <text class="note-cover-fallback-text">{{item.coverFallbackText}}</text>
+              </view>
+              <view class="note-body">
+                <text class="note-title">{{item.previewTitle}}</text>
+                <view class="note-foot">
+                  <text class="note-foot-meta">{{timeUtils.formatTime(item.createdAt)}}</text>
+                  <text class="note-foot-meta">♡ {{item.likes || 0}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <block wx:else>
+        <view wx:if="{{questions.length === 0}}" class="status-box status-box-light">
+          <text class="status-text">还没有公开提问</text>
+        </view>
+
+        <block wx:else>
+          <view wx:for="{{questions}}" wx:key="_id" class="question-card" bindtap="goQuestionDetail" data-id="{{item._id}}">
+            <text class="question-title">{{item.title}}</text>
+            <text wx:if="{{item.content}}" class="question-content">{{item.content}}</text>
+            <view class="question-meta-row">
+              <text class="question-meta">{{item.answerCount || 0}} 回答</text>
+              <text class="question-meta">{{item.viewCount || 0}} 浏览</text>
+              <text class="question-meta">{{timeUtils.formatTime(item.createdAt)}}</text>
+            </view>
+          </view>
+        </block>
+      </block>
+    </view>
+  </block>
+</view>
