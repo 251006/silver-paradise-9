@@ -27,18 +27,17 @@
         <view class="note-card" wx:for="{{postsLeft}}" wx:key="_id" bindtap="goPostDetail" data-id="{{item._id}}">
           <image
             wx:if="{{item.coverImage}}"
-            class="note-cover"
+            class="note-cover post-note-cover"
             src="{{item.coverImage}}"
             mode="aspectFill"
             data-src="{{item.coverImage}}"
             catchtap="previewPostImage"
           />
+          <view wx:else class="note-cover post-note-cover post-cover-fallback">
+            <view class="post-cover-fallback-text">{{item.coverFallbackText}}</view>
+          </view>
           <view class="note-body">
             <text class="note-title">{{item.previewTitle}}</text>
-            <view wx:if="{{item.auditStatus === 'warned' && item.riskWarning}}" class="risk-banner">
-              <text class="risk-banner-label">风险提示</text>
-              <text class="risk-banner-text">{{item.riskWarning}}</text>
-            </view>
             <view class="note-meta">
               <view class="author-chip">
                 <image wx:if="{{item.authorAvatarUrl}}" class="chip-avatar" src="{{item.authorAvatarUrl}}" mode="aspectFill" />
@@ -66,18 +65,17 @@
         <view class="note-card" wx:for="{{postsRight}}" wx:key="_id" bindtap="goPostDetail" data-id="{{item._id}}">
           <image
             wx:if="{{item.coverImage}}"
-            class="note-cover"
+            class="note-cover post-note-cover"
             src="{{item.coverImage}}"
             mode="aspectFill"
             data-src="{{item.coverImage}}"
             catchtap="previewPostImage"
           />
+          <view wx:else class="note-cover post-note-cover post-cover-fallback">
+            <view class="post-cover-fallback-text">{{item.coverFallbackText}}</view>
+          </view>
           <view class="note-body">
             <text class="note-title">{{item.previewTitle}}</text>
-            <view wx:if="{{item.auditStatus === 'warned' && item.riskWarning}}" class="risk-banner">
-              <text class="risk-banner-label">风险提示</text>
-              <text class="risk-banner-text">{{item.riskWarning}}</text>
-            </view>
             <view class="note-meta">
               <view class="author-chip">
                 <image wx:if="{{item.authorAvatarUrl}}" class="chip-avatar" src="{{item.authorAvatarUrl}}" mode="aspectFill" />

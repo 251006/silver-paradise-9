@@ -2,6 +2,8 @@
 const POSTS_CACHE_KEY = "community_posts_cache";
 const QUESTIONS_CACHE_KEY = "community_questions_cache";
 const COMMUNITY_CACHE_TTL = 5 * 60 * 1000;
+const POSTS_PAGE_SIZE = 4;
+const QUESTIONS_PAGE_SIZE = 20;
 
 Page({
   data: {
@@ -65,12 +67,23 @@ Page({
     return text.length > 36 ? `${text.slice(0, 36)}...` : text;
   },
 
+  _getCoverFallbackText(content = "") {
+    const text = `${content || ""}`.replace(/\s+/g, " ").trim();
+    if (!text) return "银龄时光";
+
+    const truncated = text.length > 7 ? `${text.slice(0, 7)}...` : text;
+    const line1 = truncated.slice(0, 4);
+    const line2 = truncated.slice(4);
+    return line2 ? `${line1}\n${line2}` : line1;
+  },
+
   _normalizePosts(posts = []) {
     return posts.map((post) => ({
       ...post,
       canDelete: post.authorId === this.data.currentUserOpenid,
       coverImage: Array.isArray(post.images) && post.images.length > 0 ? post.images[0] : "",
       previewTitle: this._getPreviewTitle(post.content),
+      coverFallbackText: this._getCoverFallbackText(post.content),
       authorInitial: post.authorName ? post.authorName.slice(0, 1) : "长",
     }));
   },
@@ -131,7 +144,7 @@ Page({
           postsLeft: layout.left,
           postsRight: layout.right,
           postsPage: 1,
-          postsHasMore: posts.length >= 20,
+          postsHasMore: posts.length >= POSTS_PAGE_SIZE,
           postsLoading: false,
         });
       } else {
@@ -142,7 +155,7 @@ Page({
           questionsLeft: layout.left,
           questionsRight: layout.right,
           questionsPage: 1,
-          questionsHasMore: questions.length >= 20,
+          questionsHasMore: questions.length >= QUESTIONS_PAGE_SIZE,
           questionsLoading: false,
         });
       }
@@ -188,7 +201,7 @@ Page({
         data: {
           type: "listAllPosts",
           page: this.data.postsPage,
-          pageSize: 20,
+          pageSize: POSTS_PAGE_SIZE,
         },
       });
 
@@ -203,7 +216,7 @@ Page({
         }
 
         this.setData({
-          postsHasMore: incoming.length === 20,
+          postsHasMore: incoming.length === POSTS_PAGE_SIZE,
           postsLoading: false,
         });
       } else {
@@ -254,7 +267,7 @@ Page({
         data: {
           type: "listQuestions",
           page: this.data.questionsPage,
-          pageSize: 20,
+          pageSize: QUESTIONS_PAGE_SIZE,
         },
       });
 
@@ -269,7 +282,7 @@ Page({
         }
 
         this.setData({
-          questionsHasMore: incoming.length === 20,
+          questionsHasMore: incoming.length === QUESTIONS_PAGE_SIZE,
           questionsLoading: false,
         });
       } else {

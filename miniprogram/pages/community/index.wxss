@@ -127,14 +127,50 @@
   box-shadow: 0 6rpx 20rpx rgba(171, 106, 61, 0.08);
 }
 
+.note-card {
+  min-height: 520rpx;
+}
+
 .note-cover {
   width: 100%;
   height: 248rpx;
   background: #F4EEE7;
 }
 
+.post-note-cover {
+  height: 338rpx;
+}
+
+.post-cover-fallback {
+  position: relative;
+  background: linear-gradient(145deg, #FFFDF9 0%, #FFF5E8 58%, #FCECD8 100%);
+}
+
+.post-cover-fallback-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 78%;
+  font-family: "STKaiti", "KaiTi", "FangSong", serif;
+  font-size: 40rpx;
+  line-height: 1.45;
+  font-weight: 600;
+  color: #6F4B2A;
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-all;
+  text-align: center;
+  max-height: 4.35em;
+  overflow: hidden;
+  text-shadow: 0 2rpx 4rpx rgba(255, 255, 255, 0.4);
+}
+
 .note-body {
   padding: 16rpx 16rpx 14rpx;
+  min-height: 180rpx;
+  display: flex;
+  flex-direction: column;
 }
 
 .note-title {
@@ -142,6 +178,7 @@
   line-height: 1.5;
   color: #2F241F;
   font-weight: 600;
+  min-height: 86rpx;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -183,7 +220,7 @@
 }
 
 .note-meta {
-  margin-top: 16rpx;
+  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
