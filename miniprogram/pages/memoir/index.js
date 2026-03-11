@@ -1,4 +1,6 @@
 // pages/memoir/index.js - 回忆录列表
+const MEMOIR_CACHE_TTL = 5 * 60 * 1000; // 5分钟内不重复请求
+
 Page({
   data: {
     memoirs: [],
@@ -6,6 +8,7 @@ Page({
   },
 
   onShow() {
+    if (this.data.memoirs.length > 0 && this._cacheTime && Date.now() - this._cacheTime < MEMOIR_CACHE_TTL) return;
     this.loadMemoirs();
   },
 
@@ -19,6 +22,7 @@ Page({
 
       if (res.result.code === 0) {
         this.setData({ memoirs: res.result.memoirs });
+        this._cacheTime = Date.now();
       }
     } catch (err) {
       console.error("加载回忆录失败", err);
@@ -28,6 +32,7 @@ Page({
   },
 
   goCreate() {
+    this._cacheTime = 0; // 可能新增内容，返回时强制刷新
     wx.navigateTo({ url: "/pages/memoir/create" });
   },
 

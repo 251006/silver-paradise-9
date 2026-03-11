@@ -1,3 +1,6 @@
+// pages/qa/index.js
+const QA_CACHE_TTL = 5 * 60 * 1000; // 5分钟内不重复请求
+
 Page({
   data: {
     questions: [],
@@ -25,6 +28,9 @@ Page({
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
       this.getTabBar().setData({ selected: 2 });
     }
+
+    // 查询状态下有缓存且未过期，跳过重新加载
+    if (!this.data.keyword && this.data.questions.length > 0 && this._cacheTime && Date.now() - this._cacheTime < QA_CACHE_TTL) return;
 
     this.refreshQuestions();
   },
@@ -115,6 +121,7 @@ Page({
           hasMore: !!res.result.hasMore,
           page: nextPage + 1,
         });
+        if (reset && !this.data.keyword) this._cacheTime = Date.now();
       } else {
         wx.showToast({
           title: (res.result && res.result.msg) || "加载失败",

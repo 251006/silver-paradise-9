@@ -89,20 +89,91 @@
     </view>
 
     <block wx:else>
-      <view wx:for="{{posts}}" wx:key="_id" class="post-card" bindtap="goPostDetail" data-id="{{item._id}}">
-        <text class="post-content">{{item.content}}</text>
-        <view class="post-footer">
-          <text class="post-time">{{timeUtils.formatTime(item.createdAt)}}</text>
-          <view class="post-actions">
-            <view class="action-item" catchtap="onLikePost" data-id="{{item._id}}">
-              <text class="action-icon">{{item.liked ? '♥' : '♡'}}</text>
-              <text class="action-count">{{item.likes || 0}}</text>
+      <view class="masonry-wrap">
+        <view class="masonry">
+          <view class="masonry-col">
+            <view class="my-note-card" wx:for="{{postsLeft}}" wx:key="_id" bindtap="goPostDetail" data-id="{{item._id}}">
+              <image
+                wx:if="{{item.coverImage}}"
+                class="note-cover post-note-cover"
+                src="{{item.coverImage}}"
+                mode="aspectFill"
+                data-src="{{item.coverImage}}"
+                catchtap="previewPostImage"
+              />
+              <view wx:else class="note-cover post-note-cover post-cover-fallback">
+                <view class="post-cover-fallback-text">{{item.coverFallbackText}}</view>
+              </view>
+              <view class="note-body">
+                <text class="note-title">{{item.previewTitle}}</text>
+                <view class="note-meta">
+                  <view class="author-chip">
+                    <image wx:if="{{item.authorAvatarUrl}}" class="chip-avatar" src="{{item.authorAvatarUrl}}" mode="aspectFill" />
+                    <view wx:else class="chip-avatar chip-avatar-fallback">
+                      <text>{{item.authorInitial}}</text>
+                    </view>
+                    <text class="chip-name">{{item.authorName || nickname}}</text>
+                  </view>
+                  <view class="note-actions">
+                    <view class="like-btn {{item.liked ? 'liked' : ''}}" data-id="{{item._id}}" catchtap="onLikePost">
+                      <text class="like-icon">{{item.liked ? '♥' : '♡'}}</text>
+                      <text class="like-count">{{item.likes || 0}}</text>
+                    </view>
+                    <view class="more-btn" catchtap="deletePost" data-id="{{item._id}}">
+                      <text>⋯</text>
+                    </view>
+                  </view>
+                </view>
+                <view class="memoir-action-row">
+                  <view class="memoir-btn" catchtap="addToMemoir" data-id="{{item._id}}">
+                    <text class="memoir-btn-text">加入回忆录</text>
+                  </view>
+                </view>
+                <text class="note-time">{{timeUtils.formatTime(item.createdAt)}}</text>
+              </view>
             </view>
-            <view class="action-item memoir-btn" catchtap="addToMemoir" data-id="{{item._id}}">
-              <text class="action-text">加入回忆录</text>
-            </view>
-            <view class="action-item delete-btn" catchtap="deletePost" data-id="{{item._id}}">
-              <text class="action-text">删除</text>
+          </view>
+
+          <view class="masonry-col">
+            <view class="my-note-card" wx:for="{{postsRight}}" wx:key="_id" bindtap="goPostDetail" data-id="{{item._id}}">
+              <image
+                wx:if="{{item.coverImage}}"
+                class="note-cover post-note-cover"
+                src="{{item.coverImage}}"
+                mode="aspectFill"
+                data-src="{{item.coverImage}}"
+                catchtap="previewPostImage"
+              />
+              <view wx:else class="note-cover post-note-cover post-cover-fallback">
+                <view class="post-cover-fallback-text">{{item.coverFallbackText}}</view>
+              </view>
+              <view class="note-body">
+                <text class="note-title">{{item.previewTitle}}</text>
+                <view class="note-meta">
+                  <view class="author-chip">
+                    <image wx:if="{{item.authorAvatarUrl}}" class="chip-avatar" src="{{item.authorAvatarUrl}}" mode="aspectFill" />
+                    <view wx:else class="chip-avatar chip-avatar-fallback">
+                      <text>{{item.authorInitial}}</text>
+                    </view>
+                    <text class="chip-name">{{item.authorName || nickname}}</text>
+                  </view>
+                  <view class="note-actions">
+                    <view class="like-btn {{item.liked ? 'liked' : ''}}" data-id="{{item._id}}" catchtap="onLikePost">
+                      <text class="like-icon">{{item.liked ? '♥' : '♡'}}</text>
+                      <text class="like-count">{{item.likes || 0}}</text>
+                    </view>
+                    <view class="more-btn" catchtap="deletePost" data-id="{{item._id}}">
+                      <text>⋯</text>
+                    </view>
+                  </view>
+                </view>
+                <view class="memoir-action-row">
+                  <view class="memoir-btn" catchtap="addToMemoir" data-id="{{item._id}}">
+                    <text class="memoir-btn-text">加入回忆录</text>
+                  </view>
+                </view>
+                <text class="note-time">{{timeUtils.formatTime(item.createdAt)}}</text>
+              </view>
             </view>
           </view>
         </view>
