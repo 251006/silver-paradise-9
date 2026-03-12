@@ -15,7 +15,7 @@
         <text class="nav-tab {{activeTab === 0 ? 'is-active' : ''}}" data-index="0" bindtap="onTabChange">发现</text>
         <text class="nav-tab {{activeTab === 1 ? 'is-active' : ''}}" data-index="1" bindtap="onTabChange">提问</text>
       </view>
-      <view class="nav-right">
+      <view class="nav-right" bindtap="onSearchTap">
         <text class="search-icon">⌕</text>
       </view>
     </view>

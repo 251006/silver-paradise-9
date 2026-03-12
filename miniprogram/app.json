@@ -16,7 +16,8 @@
     "pages/followList/index",
     "pages/memoir/index",
     "pages/memoir/detail",
-    "pages/memoir/create"
+    "pages/memoir/create",
+    "pages/search/index"
   ],
   "window": {
     "backgroundColor": "#FFF8F0",

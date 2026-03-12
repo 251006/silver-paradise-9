@@ -1,0 +1,156 @@
+<!-- pages/search/index.wxml -->
+<view class="search-page">
+
+  <!-- 顶部搜索栏（含状态栏占位） -->
+  <view class="search-header" style="padding-top: {{statusBarHeight}}px;">
+    <view class="header-row" style="height: {{navBarHeight}}px; padding-right: {{capsuleRight}}px;">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
+      <view class="search-box">
+        <text class="search-box-icon">⌕</text>
+        <input
+          class="search-input"
+          type="text"
+          placeholder="搜索动态内容、用户名"
+          placeholder-class="search-placeholder"
+          confirm-type="search"
+          value="{{keyword}}"
+          bindinput="onKeywordInput"
+          bindconfirm="onSearch"
+          focus="{{true}}"
+          maxlength="30"
+        />
+        <view wx:if="{{keyword}}" class="clear-btn" catchtap="onClear">
+          <text class="clear-icon">✕</text>
+        </view>
+      </view>
+      <view class="confirm-btn" bindtap="onSearch">
+        <text>搜索</text>
+      </view>
+    </view>
+
+    <!-- 过滤标签（搜索后显示） -->
+    <view class="filter-bar" wx:if="{{hasSearched}}">
+      <text
+        class="filter-tab {{activeFilter === 'all' ? 'filter-active' : ''}}"
+        data-type="all"
+        bindtap="onFilterChange"
+      >全部</text>
+      <text
+        class="filter-tab {{activeFilter === 'posts' ? 'filter-active' : ''}}"
+        data-type="posts"
+        bindtap="onFilterChange"
+      >动态</text>
+      <text
+        class="filter-tab {{activeFilter === 'questions' ? 'filter-active' : ''}}"
+        data-type="questions"
+        bindtap="onFilterChange"
+      >提问</text>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <text class="loading-text">搜索中...</text>
+  </view>
+
+  <!-- 无结果 -->
+  <view class="empty-wrap" wx:elif="{{hasSearched && displayLeft.length === 0 && displayRight.length === 0}}">
+    <text class="empty-icon">🔍</text>
+    <text class="empty-text">没有找到相关内容</text>
+    <text class="empty-sub">换个关键词试试</text>
+  </view>
+
+  <!-- 结果瀑布流 -->
+  <view class="result-wrap" wx:elif="{{hasSearched}}">
+    <view class="masonry">
+      <view class="masonry-col">
+        <view
+          class="result-card"
+          wx:for="{{displayLeft}}"
+          wx:key="_id"
+          bindtap="goDetail"
+          data-id="{{item._id}}"
+          data-type="{{item._type}}"
+        >
+          <view class="type-tag type-{{item._type}}">
+            <text>{{item._type === 'post' ? '动态' : '提问'}}</text>
+          </view>
+          <image
+            wx:if="{{item._coverImage}}"
+            class="result-cover"
+            src="{{item._coverImage}}"
+            mode="aspectFill"
+            data-src="{{item._coverImage}}"
+            catchtap="previewImage"
+          />
+          <view wx:else class="result-cover result-no-img">
+            <text class="no-img-text">{{item._displayTitle}}</text>
+          </view>
+          <view class="result-body">
+            <text class="result-title">{{item._displayTitle}}</text>
+            <view class="result-foot">
+              <view class="author-chip">
+                <image wx:if="{{item.authorAvatarUrl}}" class="chip-avatar" src="{{item.authorAvatarUrl}}" mode="aspectFill" />
+                <view wx:else class="chip-avatar chip-fallback">
+                  <text>{{item._authorInitial}}</text>
+                </view>
+                <text class="chip-name">{{item.authorName || '匿名长辈'}}</text>
+              </view>
+              <text wx:if="{{item._type === 'post'}}" class="stat-text">♡ {{item.likes || 0}}</text>
+              <text wx:if="{{item._type === 'question'}}" class="stat-text">{{item.answerCount || 0}} 答</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="masonry-col">
+        <view
+          class="result-card"
+          wx:for="{{displayRight}}"
+          wx:key="_id"
+          bindtap="goDetail"
+          data-id="{{item._id}}"
+          data-type="{{item._type}}"
+        >
+          <view class="type-tag type-{{item._type}}">
+            <text>{{item._type === 'post' ? '动态' : '提问'}}</text>
+          </view>
+          <image
+            wx:if="{{item._coverImage}}"
+            class="result-cover"
+            src="{{item._coverImage}}"
+            mode="aspectFill"
+            data-src="{{item._coverImage}}"
+            catchtap="previewImage"
+          />
+          <view wx:else class="result-cover result-no-img">
+            <text class="no-img-text">{{item._displayTitle}}</text>
+          </view>
+          <view class="result-body">
+            <text class="result-title">{{item._displayTitle}}</text>
+            <view class="result-foot">
+              <view class="author-chip">
+                <image wx:if="{{item.authorAvatarUrl}}" class="chip-avatar" src="{{item.authorAvatarUrl}}" mode="aspectFill" />
+                <view wx:else class="chip-avatar chip-fallback">
+                  <text>{{item._authorInitial}}</text>
+                </view>
+                <text class="chip-name">{{item.authorName || '匿名长辈'}}</text>
+              </view>
+              <text wx:if="{{item._type === 'post'}}" class="stat-text">♡ {{item.likes || 0}}</text>
+              <text wx:if="{{item._type === 'question'}}" class="stat-text">{{item.answerCount || 0}} 答</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 默认引导（未搜索时） -->
+  <view class="hint-wrap" wx:if="{{!hasSearched && !loading}}">
+    <text class="hint-icon">⌕</text>
+    <text class="hint-text">搜索帖子内容或用户名</text>
+  </view>
+
+</view>

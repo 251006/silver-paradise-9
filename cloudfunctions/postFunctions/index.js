@@ -861,6 +861,81 @@ async function deletePost(event, wxContext) {
   }
 }
 
+// 搜索动态（按内容及作者昵称关键词过滤）
+async function searchPosts(event, wxContext) {
+  const openid = wxContext.OPENID;
+  const keyword = `${event.keyword || ""}`.trim().slice(0, 30);
+  if (!keyword) return { code: 0, posts: [] };
+
+  try {
+    // 拉取最近 100 条用于客户端过滤
+    const res = await db
+      .collection("posts")
+      .orderBy("createdAt", "desc")
+      .limit(100)
+      .get();
+
+    // 批量获取作者信息
+    const authorIds = [...new Set(res.data.map((p) => p.authorId))];
+    const userRes = await db
+      .collection("users")
+      .where({ _id: _.in(authorIds) })
+      .field({ nickname: true, avatarUrl: true })
+      .get();
+
+    const nameMap = {};
+    const avatarMap = {};
+    userRes.data.forEach((u) => {
+      nameMap[u._id] = u.nickname || "";
+      avatarMap[u._id] = u.avatarUrl || "";
+    });
+
+    // 关键词过滤
+    const normalized = keyword.toLowerCase();
+    const filtered = res.data.filter((p) => {
+      const content = `${p.content || ""}`.toLowerCase();
+      const name = `${nameMap[p.authorId] || ""}`.toLowerCase();
+      return content.includes(normalized) || name.includes(normalized);
+    });
+
+    // 只对过滤后的结果获取临时 URL
+    const usedAvatarPaths = [...new Set(
+      filtered.map((p) => avatarMap[p.authorId]).filter((u) => u && u.startsWith("cloud://"))
+    )];
+    const usedImagePaths = [...new Set(
+      filtered.flatMap((p) => (p.images || []).filter((img) => img.startsWith("cloud://")))
+    )];
+    const allOriginalPaths = [...new Set([...usedAvatarPaths, ...usedImagePaths])];
+    const allNewPaths = allOriginalPaths.map((f) => f.replace("/posts/", "/posts/photos/"));
+
+    const tempUrlMap = {};
+    if (allNewPaths.length > 0) {
+      const tempRes = await cloud.getTempFileURL({ fileList: allNewPaths });
+      tempRes.fileList.forEach((item, index) => {
+        if (item.tempFileURL) {
+          tempUrlMap[allOriginalPaths[index]] = item.tempFileURL;
+        }
+      });
+    }
+
+    const posts = filtered.map((p) => {
+      const rawAvatar = avatarMap[p.authorId] || "";
+      return {
+        ...p,
+        images: (p.images || []).map((img) => tempUrlMap[img] || img),
+        authorName: nameMap[p.authorId] || "匿名用户",
+        authorAvatarUrl: tempUrlMap[rawAvatar] || rawAvatar,
+        liked: ensureArray(p.likedBy).includes(openid),
+      };
+    });
+
+    return { code: 0, posts };
+  } catch (err) {
+    console.error("searchPosts error:", err);
+    return { code: -1, msg: "搜索失败" };
+  }
+}
+
 // 主入口路由
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
@@ -886,6 +961,8 @@ exports.main = async (event, context) => {
       return insertComment(event, wxContext);
     case "deletePost":
       return deletePost(event, wxContext);
+    case "searchPosts":
+      return searchPosts(event, wxContext);
     default:
       return { code: -1, msg: "未知操作类型" };
   }

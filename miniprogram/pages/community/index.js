@@ -302,6 +302,10 @@ Page({
     }
   },
 
+  onSearchTap() {
+    wx.navigateTo({ url: "/pages/search/index" });
+  },
+
   goAsk() {
     wx.navigateTo({ url: "/pages/qa/ask" });
   },
