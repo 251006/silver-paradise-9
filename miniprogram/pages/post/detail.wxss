@@ -41,16 +41,16 @@
   position: absolute;
   right: 20rpx;
   bottom: 24rpx;
-  min-width: 76rpx;
-  height: 44rpx;
-  border-radius: 22rpx;
-  padding: 0 14rpx;
+  min-width: 88rpx;
+  height: 50rpx;
+  border-radius: 25rpx;
+  padding: 0 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.4);
   color: #FFFFFF;
-  font-size: 22rpx;
+  font-size: 26rpx;
 }
 
 .post-head,
@@ -98,22 +98,22 @@
 
 .author-name,
 .comment-author {
-  font-size: 30rpx;
-  font-weight: 600;
+  font-size: 34rpx;
+  font-weight: 700;
   color: #191A1F;
 }
 
 .follow-btn {
-  min-width: 136rpx;
-  height: 60rpx;
-  padding: 0 22rpx;
+  min-width: 150rpx;
+  height: 66rpx;
+  padding: 0 24rpx;
   border-radius: 999rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #16151d;
   color: #ffffff;
-  font-size: 24rpx;
+  font-size: 28rpx;
 }
 
 .follow-btn-active {
@@ -123,16 +123,16 @@
 
 .post-time,
 .comment-time {
-  margin-top: 4rpx;
-  font-size: 22rpx;
+  margin-top: 6rpx;
+  font-size: 26rpx;
   color: #8F939E;
 }
 
 .post-content {
   display: block;
-  margin-top: 22rpx;
-  font-size: 31rpx;
-  line-height: 1.78;
+  margin-top: 24rpx;
+  font-size: 36rpx;
+  line-height: 1.8;
   color: #2B2E36;
   white-space: pre-wrap;
 }
@@ -151,14 +151,14 @@
 
 .risk-label {
   display: block;
-  margin-bottom: 6rpx;
-  font-size: 22rpx;
+  margin-bottom: 8rpx;
+  font-size: 26rpx;
   color: #9A5B00;
   font-weight: 600;
 }
 
 .risk-text {
-  font-size: 24rpx;
+  font-size: 28rpx;
   line-height: 1.6;
   color: #8A5A00;
 }
@@ -174,15 +174,15 @@
 
 .stat-btn,
 .stat-chip {
-  height: 62rpx;
-  border-radius: 31rpx;
-  padding: 0 22rpx;
+  height: 68rpx;
+  border-radius: 34rpx;
+  padding: 0 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #F3F5F9;
   color: #5C6270;
-  font-size: 26rpx;
+  font-size: 30rpx;
 }
 
 .stat-btn-active {
@@ -191,8 +191,8 @@
 }
 
 .stat-icon {
-  margin-right: 8rpx;
-  font-size: 28rpx;
+  margin-right: 10rpx;
+  font-size: 32rpx;
 }
 
 .comments-section {
@@ -205,9 +205,9 @@
 }
 
 .section-title {
-  font-size: 32rpx;
+  font-size: 38rpx;
   color: #191A1F;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .comment-card {
@@ -217,9 +217,9 @@
 
 .comment-content {
   display: block;
-  margin-top: 14rpx;
+  margin-top: 16rpx;
   padding-left: 92rpx;
-  font-size: 28rpx;
+  font-size: 32rpx;
   line-height: 1.7;
   color: #363A44;
   white-space: pre-wrap;
@@ -240,23 +240,23 @@
 
 .comment-input {
   flex: 1;
-  height: 76rpx;
-  border-radius: 38rpx;
+  height: 84rpx;
+  border-radius: 42rpx;
   background: #F4F6FA;
-  padding: 0 24rpx;
-  font-size: 28rpx;
+  padding: 0 28rpx;
+  font-size: 32rpx;
   color: #2A2D35;
 }
 
 .comment-submit {
-  width: 132rpx;
-  height: 76rpx;
-  line-height: 76rpx;
-  border-radius: 38rpx;
+  width: 144rpx;
+  height: 84rpx;
+  line-height: 84rpx;
+  border-radius: 42rpx;
   border: none;
   background: linear-gradient(135deg, #FF4D6D, #FF7A4E);
   color: #FFFFFF;
-  font-size: 28rpx;
+  font-size: 32rpx;
   padding: 0;
 }
 
@@ -277,6 +277,6 @@
 
 .loading-text,
 .empty-text {
-  font-size: 28rpx;
+  font-size: 32rpx;
   color: #AA9A91;
 }

@@ -1,6 +1,6 @@
 // 聚合数据API配置
 module.exports = {
-  JUHE_API_KEY: "bfeef2777c75b7311efc61154fc8068e",
+  JUHE_API_KEY: "5f8ce13c47b18a6e9ef7e417a0ebfe29",
   API_URL: "http://v.juhe.cn/toutiao/index",
   API_DETAIL_URL: "http://v.juhe.cn/toutiao/content",
   

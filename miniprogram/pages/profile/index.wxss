@@ -29,11 +29,11 @@
 }
 
 .header-action-icon {
-  font-size: 24rpx;
+  font-size: 28rpx;
 }
 
 .header-action-text {
-  font-size: 24rpx;
+  font-size: 28rpx;
 }
 
 .user-header {
@@ -73,28 +73,28 @@
 }
 
 .user-name {
-  font-size: 48rpx;
+  font-size: 54rpx;
   font-weight: 700;
 }
 
 .role-badge {
-  padding: 8rpx 16rpx;
+  padding: 10rpx 18rpx;
   border-radius: 999rpx;
   background: rgba(255, 255, 255, 0.18);
-  font-size: 22rpx;
+  font-size: 26rpx;
 }
 
 .user-id {
   display: block;
-  margin-top: 16rpx;
-  font-size: 26rpx;
+  margin-top: 18rpx;
+  font-size: 30rpx;
   color: rgba(255, 248, 238, 0.88);
 }
 
 .user-bio {
   display: block;
-  margin-top: 10rpx;
-  font-size: 25rpx;
+  margin-top: 12rpx;
+  font-size: 28rpx;
   color: rgba(255, 248, 238, 0.76);
   line-height: 1.6;
 }
@@ -127,13 +127,13 @@
 }
 
 .stat-number {
-  font-size: 42rpx;
+  font-size: 48rpx;
   font-weight: 700;
   color: #2d2419;
 }
 
 .stat-label {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #8f7d68;
 }
 
@@ -161,7 +161,7 @@
 }
 
 .function-icon {
-  font-size: 42rpx;
+  font-size: 48rpx;
 }
 
 .function-info {
@@ -170,15 +170,15 @@
 
 .function-title {
   display: block;
-  font-size: 28rpx;
-  font-weight: 600;
+  font-size: 34rpx;
+  font-weight: 700;
   color: #2f271d;
 }
 
 .function-desc {
   display: block;
-  margin-top: 8rpx;
-  font-size: 24rpx;
+  margin-top: 10rpx;
+  font-size: 28rpx;
   line-height: 1.6;
   color: #8b7a66;
 }
@@ -191,13 +191,13 @@
 }
 
 .section-title {
-  font-size: 34rpx;
+  font-size: 40rpx;
   font-weight: 700;
   color: #241e16;
 }
 
 .section-count {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #8f7d68;
 }
 
@@ -212,7 +212,7 @@
 
 .loading-text,
 .empty-state-text {
-  font-size: 28rpx;
+  font-size: 32rpx;
   color: #978570;
 }
 
@@ -226,7 +226,7 @@
 
 .question-title {
   display: block;
-  font-size: 31rpx;
+  font-size: 36rpx;
   line-height: 1.7;
   color: #2d2419;
 }
@@ -237,15 +237,15 @@
 
 .question-content {
   display: block;
-  margin-top: 12rpx;
-  font-size: 27rpx;
+  margin-top: 14rpx;
+  font-size: 32rpx;
   line-height: 1.7;
   color: #655744;
 }
 
 .question-meta-row {
-  margin-top: 18rpx;
-  padding-top: 18rpx;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
   border-top: 1rpx solid #f0e7d9;
   display: flex;
   align-items: center;
@@ -255,7 +255,7 @@
 }
 
 .question-meta {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #9a8974;
 }
 
@@ -326,11 +326,11 @@
 }
 
 .note-title {
-  font-size: 29rpx;
+  font-size: 34rpx;
   line-height: 1.5;
   color: #2F241F;
-  font-weight: 600;
-  min-height: 86rpx;
+  font-weight: 700;
+  min-height: 100rpx;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -366,9 +366,9 @@
 }
 
 .chip-name {
-  margin-left: 8rpx;
-  max-width: 180rpx;
-  font-size: 22rpx;
+  margin-left: 10rpx;
+  max-width: 200rpx;
+  font-size: 26rpx;
   color: #5D5049;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -378,18 +378,18 @@
 .note-actions {
   display: flex;
   align-items: center;
-  gap: 8rpx;
+  gap: 10rpx;
 }
 
 .like-btn {
-  min-width: 90rpx;
-  height: 48rpx;
-  border-radius: 24rpx;
-  padding: 0 14rpx;
+  min-width: 100rpx;
+  height: 54rpx;
+  border-radius: 27rpx;
+  padding: 0 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6rpx;
+  gap: 8rpx;
   background: #FFF4EC;
 }
 
@@ -398,12 +398,12 @@
 }
 
 .like-icon {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #f76f84;
 }
 
 .like-count {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #7C5B4D;
 }
 
@@ -433,13 +433,13 @@
 }
 
 .memoir-btn-text {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #6f624f;
 }
 
 .note-time {
-  margin-top: 8rpx;
+  margin-top: 10rpx;
   display: inline-block;
-  font-size: 21rpx;
+  font-size: 24rpx;
   color: #AA9A91;
 }

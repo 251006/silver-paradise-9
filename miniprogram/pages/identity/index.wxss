@@ -1,30 +1,106 @@
+/* 页面主容器 */
 .identity-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 80rpx 48rpx 60rpx;
-  background: linear-gradient(180deg, #FFF8F0 0%, #FFFFFF 100%);
+  padding: 60rpx 40rpx 40rpx;
+  background: linear-gradient(165deg, #FFF5EB 0%, #FFE8D6 30%, #FFEEE0 60%, #FFF9F5 100%);
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
 }
 
+/* 背景装饰 */
+.bg-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bg-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.4;
+}
+
+.bg-circle-1 {
+  width: 400rpx;
+  height: 400rpx;
+  background: radial-gradient(circle, #FFD4B8 0%, transparent 70%);
+  top: -100rpx;
+  right: -100rpx;
+}
+
+.bg-circle-2 {
+  width: 300rpx;
+  height: 300rpx;
+  background: radial-gradient(circle, #FFECD2 0%, transparent 70%);
+  top: 400rpx;
+  left: -80rpx;
+}
+
+.bg-circle-3 {
+  width: 350rpx;
+  height: 350rpx;
+  background: radial-gradient(circle, #FFE0C8 0%, transparent 70%);
+  bottom: 200rpx;
+  right: -120rpx;
+}
+
+/* 欢迎区域 */
 .welcome-header {
   text-align: center;
-  margin-bottom: 60rpx;
+  margin-bottom: 50rpx; /* 稍微增加下边距让呼吸感更好 */
+  position: relative;
+  z-index: 1;
+}
+
+.logo-wrapper {
+  width: 140rpx;
+  height: 140rpx;
+  background: linear-gradient(135deg, #FFF 0%, #FFF8F0 100%);
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(232, 113, 58, 0.15),
+              0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.logo-emoji {
+  font-size: 72rpx;
 }
 
 .welcome-title {
   display: block;
-  font-size: 56rpx;
+  font-size: 64rpx;
   font-weight: 700;
-  color: #E8713A;
+  background: linear-gradient(135deg, #D4692E 0%, #E8864A 50%, #F5A063 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   margin-bottom: 16rpx;
+  letter-spacing: 6rpx;
 }
 
 .welcome-subtitle {
   display: block;
-  font-size: 32rpx;
-  color: #666666;
+  font-size: 36rpx;
+  color: #B87A4A;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.welcome-hint {
+  display: block;
+  font-size: 28rpx;
+  color: #999;
 }
 
 /* 身份选择卡片 */
@@ -32,153 +108,283 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
-  margin-bottom: 48rpx;
+  gap: 24rpx; /* 增加卡片间距 */
+  margin-bottom: 40rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .role-card {
-  background: #FFFFFF;
-  border: 4rpx solid #E8E8E8;
-  border-radius: 24rpx;
-  padding: 40rpx 32rpx;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFCFA 100%);
+  border: 4rpx solid transparent; /* 改为透明边框，避免未选中时显得杂乱 */
+  border-radius: 32rpx; /* 圆角加大，更圆润 */
+  padding: 32rpx 28rpx;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  transition: all 0.2s;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
 }
 
 .role-card-selected {
   border-color: #E8713A;
-  background: #FFF8F0;
-  box-shadow: 0 4rpx 24rpx rgba(232, 113, 58, 0.2);
+  background: linear-gradient(135deg, #FFF8F0 0%, #FFEFE5 100%);
+  box-shadow: 0 8rpx 32rpx rgba(232, 113, 58, 0.2);
+  transform: translateY(-2rpx); /* 点击时微微浮起，比 scale 更好看 */
+}
+
+.role-icon-wrapper {
+  position: relative;
+  width: 110rpx;
+  height: 110rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.role-icon-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #FFF3E8 0%, #FFE8D6 100%);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.role-card-selected .role-icon-bg {
+  background: linear-gradient(135deg, #FFE0CC 0%, #FFD0B5 100%);
 }
 
 .role-icon {
-  font-size: 80rpx;
-  margin-bottom: 16rpx;
+  font-size: 60rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.role-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .role-name {
-  font-size: 40rpx;
-  font-weight: 600;
-  color: #333333;
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #4A3728;
   margin-bottom: 8rpx;
 }
 
 .role-desc {
-  font-size: 28rpx;
-  color: #999999;
+  font-size: 26rpx;
+  color: #A08070;
+  line-height: 1.5;
 }
 
 .role-card-selected .role-name {
-  color: #E8713A;
+  color: #D4692E;
 }
 
 .role-card-selected .role-desc {
-  color: #C85A20;
+  color: #C07850;
+}
+
+.role-check {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  border: 4rpx solid #E0E0E0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+  box-sizing: border-box;
+}
+
+.role-check-active {
+  background: linear-gradient(135deg, #E8713A 0%, #F5A623 100%);
+  border-color: transparent;
+}
+
+.check-icon {
+  font-size: 24rpx;
+  color: #FFF;
+  font-weight: bold;
+  opacity: 0;
+}
+
+.role-check-active .check-icon {
+  opacity: 1; /* 只有选中时才显示勾号 */
+}
+
+/* 个人信息区域 */
+.info-section {
+  width: 100%;
+  background: #FFFFFF;
+  border-radius: 32rpx;
+  padding: 40rpx 32rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.04);
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* 头像选择 */
 .avatar-section {
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 48rpx;
-}
-
-.avatar-label {
-  display: block;
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333333;
-  margin-bottom: 24rpx;
+  margin-bottom: 32rpx;
 }
 
 .avatar-wrapper {
-  width: 160rpx;
-  height: 160rpx;
-  border-radius: 80rpx;
-  background: #F5F5F5;
-  border: 4rpx solid #E8E8E8;
+  /* 【修复重点】使用 !important 强制覆盖微信 button 的默认宽高等样式 */
+  width: 140rpx !important; 
+  height: 140rpx !important;
+  min-height: 140rpx !important;
+  border-radius: 50% !important; 
+  background: #FFF5EB;
+  border: 4rpx solid rgba(232, 113, 58, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 0;
-  margin: 0;
-  transition: all 0.2s;
+  padding: 0 !important; /* 必须清除 button 默认 padding */
+  margin: 0 !important;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.avatar-wrapper::after {
+  display: none;
 }
 
 .avatar-wrapper:active {
-  background: #EFEFEF;
-  border-color: #E8713A;
   transform: scale(0.95);
+  border-color: #E8713A;
 }
 
 .avatar-image {
   width: 100%;
   height: 100%;
+  border-radius: 50%;
+  object-fit: cover; /* 保证图片不变形 */
+  display: block;
 }
 
 .avatar-hint {
-  display: block;
   font-size: 24rpx;
-  color: #999999;
+  color: #999;
   margin-top: 16rpx;
 }
 
 /* 昵称输入 */
 .nickname-section {
   width: 100%;
-  margin-bottom: 48rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.nickname-label {
-  display: block;
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333333;
-  margin-bottom: 16rpx;
-}
-
-.nickname-input {
+.nickname-input-wrapper {
+  display: flex;
+  align-items: center;
   width: 100%;
   height: 100rpx;
   padding: 0 32rpx;
-  font-size: 34rpx;
-  border: 4rpx solid #E8E8E8;
-  border-radius: 16rpx;
-  background: #FFFFFF;
+  border: 2rpx solid #EBEBEB;
+  border-radius: 50rpx;
+  background: #FAFAFA;
+  transition: all 0.3s ease;
   box-sizing: border-box;
 }
 
-.nickname-input:focus {
+.nickname-input-wrapper:focus-within {
   border-color: #E8713A;
+  background: #FFFDFB;
+  box-shadow: 0 4rpx 16rpx rgba(232, 113, 58, 0.1);
+}
+
+.nickname-input {
+  flex: 1;
+  height: 100%;
+  font-size: 32rpx;
+  color: #333;
+  background: transparent;
+  border: none;
+}
+
+.nickname-hint {
+  font-size: 24rpx;
+  color: #A08070;
+  margin-top: 16rpx;
 }
 
 /* 进入按钮 */
+.btn-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  margin-top: 20rpx;
+}
+
 .enter-btn {
   width: 100%;
   height: 110rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 38rpx;
-  font-weight: 600;
-  color: #FFFFFF;
-  background: #CCCCCC;
-  border-radius: 20rpx;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #FFF;
+  background: #E0E0E0; /* 默认置灰状态 */
+  border-radius: 55rpx;
   border: none;
+  transition: all 0.3s ease;
+}
+
+.enter-btn::after {
+  display: none;
+}
+
+.btn-icon {
+  font-size: 36rpx;
+  margin-right: 12rpx;
+}
+
+.btn-text {
   letter-spacing: 4rpx;
 }
 
 .enter-btn-active {
-  background: linear-gradient(135deg, #E8713A, #F5A623);
-  box-shadow: 0 8rpx 24rpx rgba(232, 113, 58, 0.4);
+  background: linear-gradient(135deg, #E8713A 0%, #F5A623 100%);
+  box-shadow: 0 8rpx 30rpx rgba(232, 113, 58, 0.3);
 }
 
 .enter-btn-active:active {
-  opacity: 0.85;
+  transform: scale(0.96);
+}
+
+/* 底部装饰 */
+.footer-decoration {
+  margin-top: auto;
+  padding-top: 40rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-text {
+  font-size: 24rpx;
+  color: #C0A090;
+  letter-spacing: 2rpx;
 }
