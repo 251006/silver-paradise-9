@@ -33,7 +33,10 @@
         data-url="{{item.url}}"
       >
         <view class="news-card-top">
-          <text class="news-tag tag tag-primary">{{item.category}}</text>
+          <view class="news-tags">
+            <text class="news-tag tag tag-primary">{{item.category}}</text>
+            <text wx:if="{{item.subCategory}}" class="news-tag tag tag-sub">{{item.subCategory}}</text>
+          </view>
           <text class="news-date">{{item.createdAt}}</text>
         </view>
         <text class="news-title">{{item.title}}</text>

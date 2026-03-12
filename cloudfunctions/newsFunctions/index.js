@@ -42,6 +42,39 @@ function fetchFromJuhe(url, params) {
   });
 }
 
+// 长辈专属关键词列表
+const { elderlyKeywords } = config;
+
+// 子分类标签映射
+const subCategoryMap = {
+  "养老政策": ["养老", "养老金", "社保", "医保", "退休", "敬老院", "福利院", "社区养老", "居家养老", "养老机构", "养老服务", "养老保障", "养老保险", "高龄", "老龄化", "银发", "老年权益", "老年福利"],
+  "健康知识": ["健康", "养生", "保健", "慢病", "高血压", "糖尿病", "心脏病", "中医", "体检", "营养", "膳食", "运动", "康复", "护理", "医疗", "医院", "名医", "专家", "义诊", "健康科普"],
+  "反诈提醒": ["诈骗", "反诈", "防骗", "电信诈骗", "网络诈骗", "保健品诈骗", "养老诈骗", "投资诈骗", "金融诈骗", "警惕", "提醒", "安全", "骗局", "骗子", "防范", "预警"],
+  "老年活动": ["老年大学", "老年活动", "老年社团", "老年旅游", "老年文化", "老年体育", "老年娱乐", "老年教育", "老年生活", "老年服务", "老年关怀", "老年关爱"],
+  "家庭亲情": ["适老化", "无障碍", "助老", "敬老", "孝老", "爱老", "护老", "家庭", "亲情", "子女", "陪伴", "关爱", "幸福晚年"]
+};
+
+// 检查新闻是否包含长辈相关关键词
+function isElderlyRelated(newsItem) {
+  const text = `${newsItem.title || ''} ${newsItem.summary || ''} ${newsItem.author_name || ''}`.toLowerCase();
+  return elderlyKeywords.some(keyword => text.includes(keyword.toLowerCase()));
+}
+
+// 根据关键词判断子分类标签
+function getSubCategoryTag(newsItem) {
+  const text = `${newsItem.title || ''} ${newsItem.summary || ''}`.toLowerCase();
+  
+  // 按优先级检查各个分类
+  for (const [category, keywords] of Object.entries(subCategoryMap)) {
+    if (keywords.some(keyword => text.includes(keyword.toLowerCase()))) {
+      return category;
+    }
+  }
+  
+  // 默认返回"老年资讯"
+  return "老年资讯";
+}
+
 // 获取资讯列表 - 调用聚合数据API
 async function listNews(event) {
   const { category = "全部", page = 1, pageSize = 20 } = event;
@@ -54,6 +87,11 @@ async function listNews(event) {
         code: -1,
         msg: "API密钥未配置，请在 config.js 中配置 JUHE_API_KEY",
       };
+    }
+
+    // 长辈专属分类特殊处理
+    if (category === "长辈专属") {
+      return await listElderlyNews(page, pageSize);
     }
 
     // 获取聚合数据API类型
@@ -105,6 +143,77 @@ async function listNews(event) {
     return {
       code: -1,
       msg: err.message || "获取资讯失败，请检查网络连接",
+    };
+  }
+}
+
+// 获取长辈专属新闻 - 聚合多个分类并筛选
+async function listElderlyNews(page, pageSize) {
+  try {
+    // 优先从健康、国内、推荐分类获取新闻
+    const targetTypes = ["jiankang", "guonei", "top"];
+    let allNews = [];
+    
+    // 从多个分类获取新闻
+    for (const type of targetTypes) {
+      const params = {
+        key: JUHE_API_KEY,
+        type: type,
+        page: 1,
+        page_size: 50, // 获取更多以便筛选
+      };
+
+      const result = await fetchFromJuhe(API_URL, params);
+      
+      if (result.error_code === 0 && result.result && result.result.data) {
+        allNews = allNews.concat(result.result.data);
+      }
+    }
+
+    // 去重（根据uniquekey）
+    const uniqueNews = [];
+    const seenKeys = new Set();
+    for (const item of allNews) {
+      if (item.uniquekey && !seenKeys.has(item.uniquekey)) {
+        seenKeys.add(item.uniquekey);
+        uniqueNews.push(item);
+      }
+    }
+
+    // 筛选与长辈相关的新闻
+    const elderlyNews = uniqueNews.filter(isElderlyRelated);
+
+    // 转换数据格式，并添加子分类标签
+    const newsList = elderlyNews.map((item) => ({
+      _id: `news_${item.uniquekey || Date.now()}`,
+      uniquekey: item.uniquekey || "",
+      title: item.title || "未知标题",
+      summary: item.summary || item.title || "无摘要",
+      content: "",
+      category: "长辈专属",
+      subCategory: getSubCategoryTag(item), // 子分类标签：养老政策/健康知识/反诈提醒/老年活动/家庭亲情
+      imageUrl: item.thumbnail_pic_s || item.thumbnail_pic_s02 || item.thumbnail_pic_s03 || "",
+      sourceUrl: item.url || "",
+      source: item.author_name || "聚合数据",
+      publishedAt: new Date(item.date || new Date()),
+      fetchedAt: new Date(),
+    }));
+
+    // 分页处理
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const paginatedNews = newsList.slice(start, end);
+
+    return {
+      code: 0,
+      news: paginatedNews,
+      total: Math.ceil(newsList.length / pageSize),
+    };
+  } catch (err) {
+    console.error("listElderlyNews error:", err);
+    return {
+      code: -1,
+      msg: err.message || "获取长辈专属资讯失败",
     };
   }
 }

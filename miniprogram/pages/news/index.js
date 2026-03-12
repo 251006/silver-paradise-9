@@ -4,8 +4,8 @@ const NEWS_CACHE_TTL = 5 * 60 * 1000; // 5分钟
 
 Page({
   data: {
-    categories: ["推荐", "国内", "国际", "娱乐", "体育", "军事", "科技", "财经", "游戏", "汽车", "健康"],
-    currentCategory: "推荐",
+    categories: ["长辈专属", "推荐", "国内", "国际", "娱乐", "体育", "军事", "科技", "财经", "游戏", "汽车", "健康"],
+    currentCategory: "长辈专属",
     newsList: [],
     loading: true,
     page: 1,
