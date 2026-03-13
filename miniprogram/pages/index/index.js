@@ -1,5 +1,7 @@
 ﻿// pages/index/index.js - 银龄乐园首页
 const app = getApp();
+const { playNavigationAudio } = require("../../utils/tts");
+const NAV_AUDIO_LEAD_MS = 420;
 
 Page({
   data: {
@@ -72,6 +74,7 @@ Page({
 
   onEntryTap(e) {
     const url = e.currentTarget.dataset.url;
+    playNavigationAudio(url);
     const tabPages = [
       "/pages/index/index",
       "/pages/news/index",
@@ -79,9 +82,13 @@ Page({
       "/pages/profile/index",
     ];
     if (tabPages.includes(url)) {
-      wx.switchTab({ url });
+      setTimeout(() => {
+        wx.switchTab({ url });
+      }, NAV_AUDIO_LEAD_MS);
     } else {
-      wx.navigateTo({ url });
+      setTimeout(() => {
+        wx.navigateTo({ url });
+      }, NAV_AUDIO_LEAD_MS);
     }
   },
 });

@@ -1,0 +1,56 @@
+﻿[
+    {
+        "key":  "home-tab",
+        "text":  "首页",
+        "fileName":  "home.wav",
+        "voice":  "Microsoft Huihui Desktop",
+        "rate":  0,
+        "volume":  100,
+        "outputPath":  "D:\\wechat_developer\\Silver_Paradise\\scripts\\generated-audio\\home.wav"
+    },
+    {
+        "key":  "news-tab",
+        "text":  "资讯",
+        "fileName":  "news.wav",
+        "voice":  "Microsoft Huihui Desktop",
+        "rate":  0,
+        "volume":  100,
+        "outputPath":  "D:\\wechat_developer\\Silver_Paradise\\scripts\\generated-audio\\news.wav"
+    },
+    {
+        "key":  "community-tab",
+        "text":  "社区",
+        "fileName":  "community.wav",
+        "voice":  "Microsoft Huihui Desktop",
+        "rate":  0,
+        "volume":  100,
+        "outputPath":  "D:\\wechat_developer\\Silver_Paradise\\scripts\\generated-audio\\community.wav"
+    },
+    {
+        "key":  "profile-tab",
+        "text":  "我的",
+        "fileName":  "profile.wav",
+        "voice":  "Microsoft Huihui Desktop",
+        "rate":  0,
+        "volume":  100,
+        "outputPath":  "D:\\wechat_developer\\Silver_Paradise\\scripts\\generated-audio\\profile.wav"
+    },
+    {
+        "key":  "publish-post",
+        "text":  "发布动态",
+        "fileName":  "publish-post.wav",
+        "voice":  "Microsoft Huihui Desktop",
+        "rate":  0,
+        "volume":  100,
+        "outputPath":  "D:\\wechat_developer\\Silver_Paradise\\scripts\\generated-audio\\publish-post.wav"
+    },
+    {
+        "key":  "ask-question",
+        "text":  "发起提问",
+        "fileName":  "ask-question.wav",
+        "voice":  "Microsoft Huihui Desktop",
+        "rate":  0,
+        "volume":  100,
+        "outputPath":  "D:\\wechat_developer\\Silver_Paradise\\scripts\\generated-audio\\ask-question.wav"
+    }
+]

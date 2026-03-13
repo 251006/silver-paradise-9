@@ -1,0 +1,8 @@
+{
+  "name": "silver-paradise",
+  "private": true,
+  "scripts": {
+    "generate:audio": "powershell -ExecutionPolicy Bypass -File ./scripts/generate-audio.ps1",
+    "generate:audio:list-voices": "powershell -ExecutionPolicy Bypass -File ./scripts/generate-audio.ps1 -ListVoices"
+  }
+}

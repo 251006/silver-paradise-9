@@ -4,11 +4,73 @@ const http = require("http");
 const config = require("./config");
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
+const db = cloud.database();
 
-// 聚合数据API配置
-const JUHE_API_KEY = config.JUHE_API_KEY;
+// 聚合数据API密钥池（支持多密钥轮询）
+const allApiKeys = (function () {
+  // 环境变量支持多key，逗号分隔
+  const envKeys = (process.env.JUHE_API_KEYS || "")
+    .split(",")
+    .map(function (k) { return k.trim(); })
+    .filter(Boolean);
+  const configKeys = Array.isArray(config.JUHE_API_KEYS) ? config.JUHE_API_KEYS : [];
+  const primaryKey = process.env.JUHE_API_KEY || config.JUHE_API_KEY || "";
+  // 主key在最前，env多key其次，config数组最后，整体去重
+  const merged = [primaryKey].concat(envKeys).concat(configKeys).filter(Boolean);
+  const seen = {};
+  return merged.filter(function (k) {
+    if (seen[k]) return false;
+    seen[k] = true;
+    return true;
+  });
+}());
+
+// 当前轮询下标（云函数实例内持久，重启后归零）
+let currentKeyIndex = 0;
+
+// 聚合数据额度耗尽错误码
+const JUHE_QUOTA_EXHAUSTED_CODES = { 10011: true, 10012: true };
+
+// 带密钥轮询的请求函数 - params 中不需要包含 key 字段
+function fetchFromJuheWithRotation(url, params) {
+  if (allApiKeys.length === 0) {
+    return Promise.reject(new Error("API密钥未配置，请在 config.js 的 JUHE_API_KEY 中填入密钥"));
+  }
+
+  function tryKey(attempt) {
+    if (attempt >= allApiKeys.length) {
+      console.error("[密钥轮询] 所有 " + allApiKeys.length + " 个 API Key 额度均已耗尽，重置到第一个Key等待明天刷新");
+      currentKeyIndex = 0;
+      return Promise.resolve({
+        error_code: 10012,
+        reason: "所有API Key（共" + allApiKeys.length + "个）额度均已耗尽，请明天再试或在 config.js 中添加更多Key",
+      });
+    }
+    const keyIndex = (currentKeyIndex + attempt) % allApiKeys.length;
+    const key = allApiKeys[keyIndex];
+    return fetchFromJuhe(url, Object.assign({}, params, { key: key })).then(function (result) {
+      if (result.error_code === 0 || result.error_code === undefined || result.error_code === null) {
+        currentKeyIndex = keyIndex;
+        return result;
+      }
+      if (JUHE_QUOTA_EXHAUSTED_CODES[result.error_code]) {
+        console.warn("[密钥轮询] Key #" + (keyIndex + 1) + " (尾号..." + key.slice(-4) + ") 额度耗尽 (error_code: " + result.error_code + ")，切换到下一个Key");
+        return tryKey(attempt + 1);
+      }
+      // 其他业务错误（非额度问题），直接返回
+      currentKeyIndex = keyIndex;
+      return result;
+    });
+  }
+
+  return tryKey(0);
+}
+
 const API_URL = config.API_URL;
 const API_DETAIL_URL = config.API_DETAIL_URL;
+const NEWS_CACHE_COLLECTION = "news_cache";
+const SERVER_CACHE_TTL_MS = 60 * 60 * 1000; // 缓存有效期：1小时（3600秒），到期后下次请求自动回源刷新
+const DEFAULT_FETCH_SIZE = 50;
 
 // 分类映射
 const categoryMap = config.categoryMap;
@@ -75,68 +137,206 @@ function getSubCategoryTag(newsItem) {
   return "老年资讯";
 }
 
+function normalizeNewsItem(item, category, extra = {}) {
+  return {
+    _id: `news_${item.uniquekey || Date.now()}`,
+    uniquekey: item.uniquekey || "",
+    title: item.title || "未知标题",
+    summary: item.summary || item.title || "无摘要",
+    content: "",
+    category,
+    imageUrl: item.thumbnail_pic_s || item.thumbnail_pic_s02 || item.thumbnail_pic_s03 || "",
+    sourceUrl: item.url || "",
+    source: item.author_name || "聚合数据",
+    publishedAt: new Date(item.date || new Date()),
+    fetchedAt: new Date(),
+    ...extra,
+  };
+}
+
+function paginateNews(newsList, page, pageSize) {
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  return newsList.slice(start, end);
+}
+
+async function getCategoryCache(category) {
+  try {
+    const cacheId = `category_${category}`;
+    const res = await db.collection(NEWS_CACHE_COLLECTION).doc(cacheId).get();
+    return res.data || null;
+  } catch (err) {
+    // 文档不存在时直接视为无缓存
+    if (err && (err.errCode === -1 || (err.message && err.message.includes("document.get:fail")))) {
+      return null;
+    }
+    console.error("读取新闻缓存失败:", err);
+    return null;
+  }
+}
+
+function isCacheFresh(cacheDoc) {
+  if (!cacheDoc || !cacheDoc.expiresAtMs) return false;
+  return cacheDoc.expiresAtMs > Date.now();
+}
+
+async function saveCategoryCache(category, newsList, source = "api") {
+  const cacheId = `category_${category}`;
+  const nowMs = Date.now();
+  const expiresAtMs = nowMs + SERVER_CACHE_TTL_MS;
+
+  await db.collection(NEWS_CACHE_COLLECTION).doc(cacheId).set({
+    data: {
+      category,
+      newsList,
+      source,
+      updatedAtMs: nowMs,
+      expiresAtMs,
+      updatedAt: db.serverDate(),
+    },
+  });
+}
+
+async function fetchNormalCategoryNews(category, page = 1, pageSize = 20) {
+  const type = categoryMap[category] || "";
+  const params = {
+    type,
+    page,
+    page_size: Math.min(pageSize, 50),
+  };
+
+  const result = await fetchFromJuheWithRotation(API_URL, params);
+  if (result.error_code && result.error_code !== 0) {
+    throw new Error(result.reason || "获取资讯失败");
+  }
+
+  const resultData = result.result && result.result.data ? result.result.data : [];
+  return resultData.map((item) =>
+    normalizeNewsItem(item, category === "全部" ? "headlines" : category.toLowerCase())
+  );
+}
+
+async function fetchElderlyNewsAll(fetchSize = 50) {
+  const targetTypes = ["jiankang", "guonei", "top"];
+  let allNews = [];
+
+  for (const type of targetTypes) {
+    const params = {
+      type,
+      page: 1,
+      page_size: Math.min(fetchSize, 50),
+    };
+
+    const result = await fetchFromJuheWithRotation(API_URL, params);
+    if (result.error_code === 0 && result.result && result.result.data) {
+      allNews = allNews.concat(result.result.data);
+    }
+  }
+
+  const uniqueNews = [];
+  const seenKeys = new Set();
+  for (const item of allNews) {
+    if (item.uniquekey && !seenKeys.has(item.uniquekey)) {
+      seenKeys.add(item.uniquekey);
+      uniqueNews.push(item);
+    }
+  }
+
+  const elderlyNews = uniqueNews.filter(isElderlyRelated);
+  return elderlyNews.map((item) =>
+    normalizeNewsItem(item, "长辈专属", { subCategory: getSubCategoryTag(item) })
+  );
+}
+
+async function refreshSingleCategoryCache(category, fetchSize = DEFAULT_FETCH_SIZE) {
+  let newsList = [];
+
+  if (category === "长辈专属") {
+    newsList = await fetchElderlyNewsAll(fetchSize);
+  } else {
+    newsList = await fetchNormalCategoryNews(category, 1, fetchSize);
+  }
+
+  await saveCategoryCache(category, newsList, "api");
+  return newsList;
+}
+
+async function refreshNewsCache(event) {
+  const categories = Array.isArray(event.categories) && event.categories.length
+    ? event.categories
+    : Object.keys(categoryMap);
+  const fetchSize = Math.min(Math.max(Number(event.fetchSize) || DEFAULT_FETCH_SIZE, 10), 50);
+
+  if (allApiKeys.length === 0) {
+    return {
+      code: -1,
+      msg: "API密钥未配置，请在 config.js 的 JUHE_API_KEY 中填入密钥",
+    };
+  }
+
+  const results = [];
+  for (const category of categories) {
+    try {
+      const newsList = await refreshSingleCategoryCache(category, fetchSize);
+      results.push({ category, count: newsList.length, success: true });
+    } catch (err) {
+      console.error(`刷新分类 ${category} 失败:`, err);
+      results.push({ category, count: 0, success: false, msg: err.message });
+    }
+  }
+
+  const successCount = results.filter((item) => item.success).length;
+  return {
+    code: successCount > 0 ? 0 : -1,
+    msg: successCount > 0 ? "刷新完成" : "全部分类刷新失败",
+    results,
+    refreshedAt: new Date(),
+  };
+}
+
 // 获取资讯列表 - 调用聚合数据API
 async function listNews(event) {
   const { category = "全部", page = 1, pageSize = 20 } = event;
 
   try {
-    // 如果API密钥未配置，提示用户
-    if (!JUHE_API_KEY) {
-      console.warn("API密钥未配置");
+    const finalPage = Math.max(Number(page) || 1, 1);
+    const finalPageSize = Math.min(Math.max(Number(pageSize) || 20, 1), 50);
+
+    // 先读取服务器缓存
+    const cacheDoc = await getCategoryCache(category);
+    if (cacheDoc && Array.isArray(cacheDoc.newsList) && isCacheFresh(cacheDoc)) {
+      const updatedAt = cacheDoc.updatedAtMs ? new Date(cacheDoc.updatedAtMs).toISOString() : "未知";
+      const expiresAt = cacheDoc.expiresAtMs ? new Date(cacheDoc.expiresAtMs).toISOString() : "未知";
+      const remainingMin = cacheDoc.expiresAtMs ? Math.round((cacheDoc.expiresAtMs - Date.now()) / 60000) : 0;
+      console.log(`[新闻缓存] ✅ 命中数据库缓存 | 分类: ${category} | 条数: ${cacheDoc.newsList.length} | 缓存时间: ${updatedAt} | 过期时间: ${expiresAt} | 剩余有效期: ${remainingMin} 分钟`);
+      const paginated = paginateNews(cacheDoc.newsList, finalPage, finalPageSize);
       return {
-        code: -1,
-        msg: "API密钥未配置，请在 config.js 中配置 JUHE_API_KEY",
+        code: 0,
+        news: paginated,
+        total: Math.ceil(cacheDoc.newsList.length / finalPageSize),
+        fromCache: true,
+        cacheUpdatedAtMs: cacheDoc.updatedAtMs,
       };
     }
 
-    // 长辈专属分类特殊处理
-    if (category === "长辈专属") {
-      return await listElderlyNews(page, pageSize);
-    }
-
-    // 获取聚合数据API类型
-    const type = categoryMap[category] || "";
-
-    const params = {
-      key: JUHE_API_KEY,
-      type: type,
-      page: page,
-      page_size: Math.min(pageSize, 50), // API最多返回50条
-    };
-
-    const result = await fetchFromJuhe(API_URL, params);
-
-    // 检查API响应
-    if (result.error_code && result.error_code !== 0) {
-      console.error("聚合数据API错误:", result.reason);
+    if (allApiKeys.length === 0) {
       return {
         code: -1,
-        msg: result.reason || "获取资讯失败",
+        msg: "新闻缓存已过期且API密钥未配置，无法回源刷新",
       };
     }
 
-    // 转换数据格式，适配前端期望和数据库文档
-    const resultData = result.result && result.result.data ? result.result.data : [];
-    const newsList = resultData.map((item) => ({
-      _id: `news_${item.uniquekey || Date.now()}`,
-      uniquekey: item.uniquekey || "", // 新闻唯一ID，用于获取详情
-      title: item.title || "未知标题",
-      summary: item.summary || item.title || "无摘要",
-      content: "", // 列表视图不返回完整内容，通过getNews获取
-      category: category === "全部" ? "headlines" : category.toLowerCase(),
-      imageUrl: item.thumbnail_pic_s || item.thumbnail_pic_s02 || item.thumbnail_pic_s03 || "",
-      sourceUrl: item.url || "",
-      source: item.author_name || "聚合数据",
-      publishedAt: new Date(item.date || new Date()),
-      fetchedAt: new Date(),
-    }));
-
-    const totalPage = result.result && result.result.totalPage ? result.result.totalPage : 0;
+    // 缓存失效时，回源刷新该分类后再返回分页数据
+    console.log(`[新闻缓存] 🔄 缓存不存在或已过期，回源拉取 | 分类: ${category} | 有效期: ${SERVER_CACHE_TTL_MS / 60000} 分钟`);
+    const refreshedList = await refreshSingleCategoryCache(category, DEFAULT_FETCH_SIZE);
+    console.log(`[新闻缓存] ✅ 回源完成，写入数据库 | 分类: ${category} | 条数: ${refreshedList.length}`);
+    const paginated = paginateNews(refreshedList, finalPage, finalPageSize);
 
     return {
       code: 0,
-      news: newsList,
-      total: totalPage,
+      news: paginated,
+      total: Math.ceil(refreshedList.length / finalPageSize),
+      fromCache: false,
     };
   } catch (err) {
     console.error("listNews error:", err);
@@ -150,64 +350,17 @@ async function listNews(event) {
 // 获取长辈专属新闻 - 聚合多个分类并筛选
 async function listElderlyNews(page, pageSize) {
   try {
-    // 优先从健康、国内、推荐分类获取新闻
-    const targetTypes = ["jiankang", "guonei", "top"];
-    let allNews = [];
-    
-    // 从多个分类获取新闻
-    for (const type of targetTypes) {
-      const params = {
-        key: JUHE_API_KEY,
-        type: type,
-        page: 1,
-        page_size: 50, // 获取更多以便筛选
-      };
-
-      const result = await fetchFromJuhe(API_URL, params);
-      
-      if (result.error_code === 0 && result.result && result.result.data) {
-        allNews = allNews.concat(result.result.data);
-      }
-    }
-
-    // 去重（根据uniquekey）
-    const uniqueNews = [];
-    const seenKeys = new Set();
-    for (const item of allNews) {
-      if (item.uniquekey && !seenKeys.has(item.uniquekey)) {
-        seenKeys.add(item.uniquekey);
-        uniqueNews.push(item);
-      }
-    }
-
-    // 筛选与长辈相关的新闻
-    const elderlyNews = uniqueNews.filter(isElderlyRelated);
-
-    // 转换数据格式，并添加子分类标签
-    const newsList = elderlyNews.map((item) => ({
-      _id: `news_${item.uniquekey || Date.now()}`,
-      uniquekey: item.uniquekey || "",
-      title: item.title || "未知标题",
-      summary: item.summary || item.title || "无摘要",
-      content: "",
-      category: "长辈专属",
-      subCategory: getSubCategoryTag(item), // 子分类标签：养老政策/健康知识/反诈提醒/老年活动/家庭亲情
-      imageUrl: item.thumbnail_pic_s || item.thumbnail_pic_s02 || item.thumbnail_pic_s03 || "",
-      sourceUrl: item.url || "",
-      source: item.author_name || "聚合数据",
-      publishedAt: new Date(item.date || new Date()),
-      fetchedAt: new Date(),
-    }));
+    const finalPage = Math.max(Number(page) || 1, 1);
+    const finalPageSize = Math.min(Math.max(Number(pageSize) || 20, 1), 50);
+    const newsList = await fetchElderlyNewsAll(DEFAULT_FETCH_SIZE);
 
     // 分页处理
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize;
-    const paginatedNews = newsList.slice(start, end);
+    const paginatedNews = paginateNews(newsList, finalPage, finalPageSize);
 
     return {
       code: 0,
       news: paginatedNews,
-      total: Math.ceil(newsList.length / pageSize),
+      total: Math.ceil(newsList.length / finalPageSize),
     };
   } catch (err) {
     console.error("listElderlyNews error:", err);
@@ -227,7 +380,7 @@ async function getNews(event) {
       return { code: -1, msg: "缺少新闻ID" };
     }
 
-    if (!JUHE_API_KEY) {
+    if (allApiKeys.length === 0) {
       return {
         code: -1,
         msg: "API密钥未配置",
@@ -235,11 +388,10 @@ async function getNews(event) {
     }
 
     const params = {
-      key: JUHE_API_KEY,
       uniquekey: uniquekey,
     };
 
-    const result = await fetchFromJuhe(API_DETAIL_URL, params);
+    const result = await fetchFromJuheWithRotation(API_DETAIL_URL, params);
 
     // 检查API响应
     if (result.error_code && result.error_code !== 0) {
@@ -305,6 +457,8 @@ exports.main = async (event, context) => {
   switch (event.type) {
     case "listNews":
       return listNews(event);
+    case "refreshNewsCache":
+      return refreshNewsCache(event);
     case "getNews":
       return getNews(event);
     default:

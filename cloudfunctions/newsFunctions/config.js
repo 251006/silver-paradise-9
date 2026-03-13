@@ -1,7 +1,11 @@
 // 聚合数据API配置
 module.exports = {
-  // 聚合数据API密钥 - 用于获取新闻
-  JUHE_API_KEY: "5f8ce13c47b18a6e9ef7e417a0ebfe29",
+  // 聚合数据API密钥 - 主密钥
+  JUHE_API_KEY: "ad4df387b28dbfd6389e31261bddc2fb",
+
+  // 聚合数据API密钥池 - 备用密钥（填入更多Key实现轮询，主Key额度耗尽后自动切换）
+  JUHE_API_KEYS: ["986a4b10476b4d27f1d948877e480e20","5f8ce13c47b18a6e9ef7e417a0ebfe29"],
+  // 示例: JUHE_API_KEYS: ["key2xxx", "key3xxx"],
   
   // DashScope API密钥 - 用于AI智能筛选长辈相关新闻
   // 请在这里填入您的阿里云DashScope API Key

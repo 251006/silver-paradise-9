@@ -1,3 +1,7 @@
+const { playNavigationAudio, playCenterActionAudio } = require("../utils/tts");
+
+const NAV_AUDIO_LEAD_MS = 420;
+
 Component({
   data: {
     selected: 0,
@@ -55,17 +59,26 @@ Component({
     switchTab(e) {
       const data = e.currentTarget.dataset;
       const url = data.path;
-      wx.switchTab({ url });
+      playNavigationAudio(url);
+      setTimeout(() => {
+        wx.switchTab({ url });
+      }, NAV_AUDIO_LEAD_MS);
     },
 
     onCenterAction() {
       if (this.data.role === "elder") {
-        wx.navigateTo({ url: "/pages/post/publish" });
+        playCenterActionAudio("elder");
+        setTimeout(() => {
+          wx.navigateTo({ url: "/pages/post/publish" });
+        }, NAV_AUDIO_LEAD_MS);
         return;
       }
 
       if (this.data.role === "young") {
-        wx.navigateTo({ url: "/pages/qa/ask" });
+        playCenterActionAudio("young");
+        setTimeout(() => {
+          wx.navigateTo({ url: "/pages/qa/ask" });
+        }, NAV_AUDIO_LEAD_MS);
         return;
       }
 
