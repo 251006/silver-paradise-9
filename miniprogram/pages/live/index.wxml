@@ -1,0 +1,47 @@
+<view class="container">
+  <view class="hero-panel">
+    <view class="hero-title">🎬 直播互动</view>
+    <view class="hero-subtitle">知识直播、才艺展示、温暖互动。保留原 demo 的直播大厅、直播间互动和老人开播入口。</view>
+  </view>
+
+  <view class="tabs">
+    <view class="tab-item {{selectedStatus === item ? 'active' : ''}}" wx:for="{{statusList}}" wx:key="*this" data-status="{{item}}" bindtap="switchStatus">{{item}}</view>
+  </view>
+
+  <block wx:if="{{displayRooms.length}}">
+    <view class="list-gap">
+      <view class="card" wx:for="{{displayRooms}}" wx:key="id">
+        <view class="live-head">
+          <view class="status-badge {{item.statusClass}}">{{item.status}}</view>
+          <view class="badge">{{item.category}}</view>
+        </view>
+        <view class="card-title">{{item.title}}</view>
+        <view class="card-body">🧓 主播：{{item.host}}\n{{item.description}}</view>
+        <view class="card-meta">👁️ {{item.viewers}} 人观看 · ❤️ {{item.likes}} 点赞</view>
+        <button class="primary-btn live-enter" data-id="{{item.id}}" bindtap="enterRoom">📺 进入直播间</button>
+      </view>
+    </view>
+  </block>
+  <view wx:else class="empty-state">当前分类暂无内容。</view>
+
+  <block wx:if="{{session.role === 'elder'}}">
+    <view class="section-title">🎤 我要开播</view>
+    <view class="form-card list-gap">
+      <view>
+        <view class="form-label">直播标题</view>
+        <input class="text-input" placeholder="给您的直播起个名字" maxlength="30" value="{{liveTitle}}" bindinput="onTitleInput" />
+      </view>
+      <view>
+        <view class="form-label">直播分类</view>
+        <picker mode="selector" range="{{categoryOptions}}" value="{{liveCategoryIndex}}" bindchange="onCategoryChange">
+          <view class="picker-field">{{selectedCategoryLabel}}</view>
+        </picker>
+      </view>
+      <view>
+        <view class="form-label">直播简介</view>
+        <textarea class="text-area" placeholder="简单介绍一下您要分享的内容" value="{{liveDesc}}" bindinput="onDescInput" />
+      </view>
+      <button class="primary-btn" bindtap="startLive">🚀 开始直播</button>
+    </view>
+  </block>
+</view>

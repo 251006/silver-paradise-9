@@ -17,7 +17,9 @@
     "pages/memoir/index",
     "pages/memoir/detail",
     "pages/memoir/create",
-    "pages/search/index"
+    "pages/search/index",
+    "pages/live/index",
+    "pages/live-room/index"
   ],
   "window": {
     "backgroundColor": "#FFF8F0",

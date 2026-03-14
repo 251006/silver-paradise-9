@@ -23,6 +23,13 @@ Page({
         color: "#4ECDC4",
       },
       {
+        icon: "🎬",
+        title: "直播互动",
+        desc: "知识直播、才艺展示",
+        url: "/pages/live/index",
+        color: "#E74C3C",
+      },
+      {
         icon: "👤",
         title: "我的主页",
         desc: "发动态、写回忆录",
@@ -44,6 +51,13 @@ Page({
         desc: "长辈动态与社区问答",
         url: "/pages/community/index",
         color: "#4ECDC4",
+      },
+      {
+        icon: "🎬",
+        title: "直播互动",
+        desc: "观看直播、温暖互动",
+        url: "/pages/live/index",
+        color: "#E74C3C",
       },
       {
         icon: "👤",

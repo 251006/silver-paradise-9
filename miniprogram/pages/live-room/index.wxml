@@ -1,0 +1,35 @@
+<block wx:if="{{room}}">
+  <view class="container">
+    <view class="card room-header">
+      <view class="card-title">🎬 {{room.title}}</view>
+      <view class="card-body">🧓 主播：{{room.host}} · {{room.category}}</view>
+      <view class="card-meta">{{room.status}} · 👁️ {{room.viewers}} 人观看</view>
+    </view>
+
+    <view class="video-stage">
+      <view class="stage-icon">📹</view>
+      <view class="stage-title">直播画面区域</view>
+      <view class="stage-desc">演示模式，实际部署时将显示视频流。</view>
+    </view>
+
+    <view class="inline-row">
+      <button class="primary-btn" bindtap="likeLive">❤️ 点赞 ({{currentLikes}})</button>
+      <button class="secondary-btn" bindtap="sendGift">🎁 送礼物</button>
+      <button class="secondary-btn" open-type="share" bindtap="shareLive">📤 分享直播</button>
+    </view>
+
+    <view class="section-title">💬 弹幕互动</view>
+    <scroll-view scroll-y="true" class="danmu-panel">
+      <view class="danmu-item" wx:for="{{danmuList}}" wx:key="*this">{{item}}</view>
+    </scroll-view>
+
+    <view class="form-card list-gap">
+      <textarea class="text-area" placeholder="说点什么..." value="{{danmuInput}}" bindinput="onDanmuInput" />
+      <button class="primary-btn" bindtap="sendDanmu">📤 发送</button>
+    </view>
+
+    <view class="card room-footer">
+      <view class="card-body">📝 简介：{{room.description}}</view>
+    </view>
+  </view>
+</block>
